@@ -8,7 +8,7 @@ REACT combines compound-hazard simulation, screening-level energy-asset derating
 
 - `REACT_v4.py` — embedded hazard/structural data and the Monte Carlo simulation engine.
 - `REACT_ESR_reproducible.py` — manuscript-aligned entry point implementing the final PRESS + permutation-calibrated ESR diagnostic.
-- `verify_headline.py` — fast deterministic smoke test for the headline state-domain classifications.
+- `verify_headline.py` — fast deterministic test for the headline state-domain classifications.
 - `requirements.txt` — Python dependencies.
 
 The separation is intentional: `REACT_v4.py` preserves the computational/data provenance of the analysis, while `REACT_ESR_reproducible.py` contains the final diagnostic specification used for the ESR manuscript.
