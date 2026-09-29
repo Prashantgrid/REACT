@@ -10,6 +10,7 @@ REACT combines compound-hazard simulation, screening-level energy-asset derating
 - `REACT_ESR_reproducible.py` — manuscript-aligned entry point implementing the final PRESS + permutation-calibrated ESR diagnostic.
 - `verify_headline.py` — fast deterministic test for the headline state-domain classifications.
 - `requirements.txt` — Python dependencies.
+- `reference/classification_audit.csv` — compact audit of all 48 state-scenario classifications, including `Psel`, `W`, median residual, `T`, permutation `p`, BH `q`, and final class.
 
 The separation is intentional: `REACT_v4.py` preserves the computational/data provenance of the analysis, while `REACT_ESR_reproducible.py` contains the final diagnostic specification used for the ESR manuscript.
 
@@ -59,13 +60,15 @@ For each retained Monte Carlo iteration, the three domain scores are residualise
 
 and propagates the associated prediction error. Across `Mw` profile draws it estimates selection stability `Psel`, median standardised residuals, and the joint separation statistic `T`. State-specific domain-label permutations provide one-sided Monte Carlo p-values, and Benjamini–Hochberg correction is applied across the sixteen states within each scenario.
 
+Random-number generation is deterministic. Each spatial scenario starts from a scenario-specific NumPy generator seed derived from the manuscript seed (`+0`, `+101`, `+202`); hazard draws, derating perturbations, and weight draws use that scenario stream sequentially, and the final diagnostic continues from the captured post-simulation generator state for residual perturbations and label permutations.
+
 A state-domain profile is reported as calibrated differentiation when:
 
 `q <= 0.10`, `Psel >= 0.70`, and `T > 0`.
 
 ## Reproducibility note
 
-During final code–manuscript synchronization, an earlier analysis build was found to use ordinary OLS residuals with leverage-scaled perturbation, while the current manuscript states the PRESS residual above. The GitHub entry point therefore defaults to the equation stated in the manuscript. This preserves the headline calibrated classifications (3 Baseline, 4 National Pool, 4 Adjacency Flow), although some selection-frequency values can shift slightly. The manuscript table should use the public-code outputs before final submission.
+During final code–manuscript synchronization, an earlier analysis build was found to use ordinary OLS residuals with leverage-scaled perturbation, while the current manuscript states the PRESS residual above. The GitHub entry point therefore defaults to the equation stated in the manuscript. This preserves the headline calibrated classifications (3 Baseline, 4 National Pool, 4 Adjacency Flow), although some selection-frequency values can shift slightly. The manuscript table uses the public-code outputs; the complete classification audit is provided in `reference/classification_audit.csv`.
 
 For provenance only, the entry point supports:
 
