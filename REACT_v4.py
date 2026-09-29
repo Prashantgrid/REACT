@@ -997,4 +997,370 @@ def _residualise(B):
         others=[k for k in range(K) if k!=b]
         X=np.column_stack([np.ones(N),B[:,others]])
         beta=np.linalg.lstsq(X,B[:,b],rcond=None)[0]
-        resid=B[:,b]-X@beta
+        resid=B[:,b]-X@beta        XtX_inv=np.linalg.pinv(X.T@X)
+        lev=np.einsum('ij,jk,ik->i',X,XtX_inv,X)
+        sigma=np.sqrt(np.sum(resid**2)/max(N-X.shape[1],1))
+        R[:,b]=resid
+        SE[:,b]=sigma*np.sqrt(np.maximum(1-lev,0.05))
+    return R,SE
+
+def diagnose_blocks(block_iter,rng):
+    M,N,K=block_iter.shape
+    counts=np.zeros((N,K)); neg=np.zeros((N,K)); z_store=np.empty((N_DIAGNOSTIC,N,K))
+    for q in range(N_DIAGNOSTIC):
+        B=block_iter[rng.integers(0,M)]
+        R,SE=_residualise(B)
+        R=R+rng.normal(0,REGRESSION_NOISE_SCALE*SE)
+        sd=R.std(axis=0,ddof=0); sd=np.where(sd<1e-12,1,sd)
+        Z=(R-R.mean(axis=0))/sd
+        z_store[q]=Z
+        winners=Z.argmin(axis=1)
+        counts[np.arange(N),winners]+=1
+        neg+=(Z<0)
+    P=counts/N_DIAGNOSTIC; W=neg/N_DIAGNOSTIC
+    med=np.median(z_store,axis=0); lo=np.quantile(z_store,0.05,axis=0); hi=np.quantile(z_store,0.95,axis=0)
+    return P,W,med,lo,hi
+
+def run_scenario(static,hazard,scenario,verbose=True):
+    hcols=["hot_days_mean","soil_moist_winter_mean","p30_days_mean",
+           "Rx1day_mm_mean","Rx1day_mm_max","Storm_Days_mean","low_wind_days_mean"]
+    fit=estimate_copula(hazard,hcols)
+    if verbose:
+        print(f"\n=== {scenario}: {fit['model']} copula, df={fit['df']}, n={fit['n_complete']} ===")
+    hr={c:(float(hazard[c].min()),float(hazard[c].max())) for c in hcols}
+    panel=build_baseline_panel(static,hazard)
+    cols=[n for n,_,_ in INDICATOR_SYSTEM]; col_to_idx={c:i for i,c in enumerate(cols)}
+    is_cost=np.array([IS_COST[c] for c in cols]); baseline_arr=panel[cols].to_numpy(float)
+    block_idx={b:np.array([col_to_idx[c] for c in BLOCK_INDICATORS[b]]) for b in BLOCK_INDICATORS}
+    D=baseline_demand(static,baseline_arr,col_to_idx)
+    r_import=static.loc[STATE_ORDER,"r_import"].to_numpy(float)
+    C_base=baseline_arr[:,col_to_idx["C_i"]]
+    rng=np.random.default_rng(RNG_SEED + {"baseline":0,"national_pool":101,"adjacency_flow":202}[scenario])
+    N=len(STATE_ORDER); J=len(cols)
+    cc_iter=np.zeros((N_MONTE_CARLO,N)); rank_iter=np.zeros((N_MONTE_CARLO,N),int)
+    yn_sum=np.zeros((N,J)); block_iter=np.zeros((N_MONTE_CARLO,N,3)); trigger_count=0
+    def nrm(v,lo,hi,inv=False):
+        x=np.clip((v-lo)/(hi-lo),0,1) if hi>lo else np.full_like(v,0.5)
+        return 1-x if inv else x
+    # State-relative ranges for the event-extreme components of Xi*: each
+    # state's draw is normalised against that state's own 35-year climatology
+    # (ETCCDI local-percentile convention), so the step-loss trigger fires for
+    # a rare compound year *for that state*, not only for climatologically
+    # wet/stormy states. Level terms (heat, low wind, soil moisture) keep the
+    # pooled ranges: they feed smooth cross-state derating, not an event trigger.
+    xi_cols=("p30_days_mean","Rx1day_mm_mean","Storm_Days_mean")
+    sr_lo={c:np.array([fit["marginals"][s][c].min() for s in STATE_ORDER]) for c in xi_cols}
+    sr_hi={c:np.array([fit["marginals"][s][c].max() for s in STATE_ORDER]) for c in xi_cols}
+    def nrm_state(v,c):
+        rng_=np.maximum(sr_hi[c]-sr_lo[c],1e-12)
+        return np.clip((v-sr_lo[c])/rng_,0,1)
+    for m in range(N_MONTE_CARLO):
+        hz=sample_hazard_year(fit,hcols,scenario!="baseline",rng)
+        hzv={c:np.array([hz[s][c] for s in STATE_ORDER]) for c in hcols}
+        Hh=nrm(hzv["hot_days_mean"],*hr["hot_days_mean"])
+        Hl=nrm(hzv["low_wind_days_mean"],*hr["low_wind_days_mean"])
+        Hsm=nrm(hzv["soil_moist_winter_mean"],*hr["soil_moist_winter_mean"],inv=True)
+        Hp=nrm_state(hzv["p30_days_mean"],"p30_days_mean")
+        Hrx=nrm_state(hzv["Rx1day_mm_mean"],"Rx1day_mm_mean")
+        Hs=nrm_state(hzv["Storm_Days_mean"],"Storm_Days_mean")
+        Xi=0.40*Hp+0.20*Hrx+0.20*Hs+0.20*np.maximum(Hp,Hrx)
+        trigger=(Xi>XI_CRIT); trigger_count+=int(trigger.sum())
+        pert={k:rng.uniform(1-PERT_PCT,1+PERT_PCT) for k in PARAMS_DERATING}
+        p=PARAMS_DERATING
+        d_pv=np.minimum(p["PV"]["beta"]*pert["PV"]*Hh,p["PV"]["delta_max"])
+        d_th=np.minimum((p["Thermal"]["alpha"]*Hh+p["Thermal"]["beta"]*Hsm)*pert["Thermal"],p["Thermal"]["delta_max"])
+        smooth=np.minimum(p["Grid"]["beta"]*pert["Grid"]*Hh,p["Grid"]["delta_max"])
+        d_grid=np.minimum(smooth+p["Grid"]["gamma"]*trigger,1.0)
+        d_w=np.minimum(p["Wind"]["beta"]*pert["Wind"]*Hl,p["Wind"]["delta_max"])
+        Y=baseline_arr.copy()
+        for name,d in [("Solar_MW",d_pv),("Thermal_MW",d_th),("WLINES",d_grid),("Wind_MW",d_w)]:
+            j=col_to_idx[name]; Y[:,j]=baseline_arr[:,j]*(1-d)
+        # Adaptive capacity is structural and is not mechanically reduced by a
+        # single simulated weather year.
+        for name,c in [("Hot_Days","hot_days_mean"),("Soil_Moist","soil_moist_winter_mean"),
+                       ("P30_Days","p30_days_mean"),("Rx1day","Rx1day_mm_mean"),
+                       ("Storm_Days","Storm_Days_mean"),("Low_Wind","low_wind_days_mean")]:
+            Y[:,col_to_idx[name]]=hzv[c]
+        if scenario=="national_pool":
+            S=dependable_supply(Y,col_to_idx)
+            scarcity=max(0.0,float((D.sum()-S.sum())/(D.sum()+1e-9)))
+            import_int=np.clip(r_import,0,1)
+            pen=np.clip(scarcity*import_int*(1-C_base),0,0.50)
+            Y[:,col_to_idx["R_ri"]]*=(1-pen)
+            Y[:,col_to_idx["C_i"]]*=(1-pen)
+        elif scenario=="adjacency_flow":
+            S=dependable_supply(Y,col_to_idx)
+            theta=adjacency_residual_shortfall(S,D,C_base)
+            Y[:,col_to_idx["C_i"]]*=(1-0.70*theta)
+            Y[:,col_to_idx["R_ri"]]*=(1-0.70*theta)
+            Y[:,col_to_idx["WLINES"]]*=(1-0.30*theta*(1-C_base))
+        Yn=normalised_indicators(Y,is_cost); yn_sum+=Yn
+        wb=sample_dirichlet_floor([DIRICHLET_ALPHA]*3,rng); w=np.zeros(J)
+        for bi,b in enumerate(("Climate","Energy","Adaptive")):
+            ww=sample_dirichlet_floor([DIRICHLET_ALPHA]*len(block_idx[b]),rng)
+            w[block_idx[b]]=wb[bi]*ww
+            block_iter[m,:,bi]=Yn[:,block_idx[b]]@ww
+        cc=topsis_cc(Yn,w); cc_iter[m]=cc; rank_iter[m]=(-cc).argsort().argsort()+1
+    cc_mean=cc_iter.mean(0); expected_rank=rank_iter.mean(0)
+    rank_accept=np.column_stack([(rank_iter==r).mean(0) for r in range(1,N+1)])
+    Bmean=block_iter.mean(0); Rmean,_=_residualise(Bmean)
+    Zmean=(Rmean-Rmean.mean(0))/np.where(Rmean.std(0)<1e-12,1,Rmean.std(0))
+    P,W,Zmed,Zlo,Zhi=diagnose_blocks(block_iter,rng)
+    Pdf=pd.DataFrame(P,index=STATE_ORDER,columns=["Climate","Energy","Adaptive"])
+    Wdf=pd.DataFrame(W,index=STATE_ORDER,columns=Pdf.columns)
+    Zdf=pd.DataFrame(Zmed,index=STATE_ORDER,columns=Pdf.columns)
+    Zlodf=pd.DataFrame(Zlo,index=STATE_ORDER,columns=Pdf.columns)
+    Zhidf=pd.DataFrame(Zhi,index=STATE_ORDER,columns=Pdf.columns)
+    dom=Pdf.idxmax(1); pdom=Pdf.max(1)
+    weak=np.array([Wdf.loc[s,dom.loc[s]] for s in STATE_ORDER])
+    zdom=np.array([Zdf.loc[s,dom.loc[s]] for s in STATE_ORDER])
+    # Certification tiers calibrated from the synthetic no-signal null
+    # (calibrate_thresholds.py; thresholds are the most conservative across
+    # factor loadings lambda in {0.5, 0.7, 0.9}):
+    #   strong:      P>0.80 & W>0.80 & Zmed < -1.53  -> <=5% per-diagnosis null FPR
+    #   indicative:  P>0.60 & W>0.60 & Zmed < -1.12  -> strong+indicative <=20% null rate
+    #   (FWER-strict variant, <=5% family-wise over 16 states: Zmed < -2.04)
+    cls=np.where((pdom.values>0.80)&(weak>0.80)&(zdom<-1.53),"strong",
+         np.where((pdom.values>0.60)&(weak>0.60)&(zdom<-1.12),"indicative","inconclusive"))
+    if verbose:
+        print("  classes",dict(pd.Series(cls).value_counts()),"trigger rate",trigger_count/(N_MONTE_CARLO*N))
+    return dict(cc_mean=cc_mean,expected_rank=expected_rank,rank_iter=rank_iter,
+                rank_accept=rank_accept,B_blocks=pd.DataFrame(Bmean,index=STATE_ORDER,columns=Pdf.columns),
+                B_resid=pd.DataFrame(Rmean,index=STATE_ORDER,columns=Pdf.columns),
+                Z_resid=Zdf,Z_resid_lo=Zlodf,Z_resid_hi=Zhidf,
+                P_dominance=Pdf,P_negative=Wdf,dominant=dom,classification=pd.Series(cls,index=STATE_ORDER),
+                copula_fit=fit,baseline_panel=panel,trigger_rate=trigger_count/(N_MONTE_CARLO*N),
+                demand_proxy=pd.Series(D,index=STATE_ORDER),block_iter=block_iter)
+
+# =============================================================================
+# 10.  FIGURES
+# =============================================================================
+def fig_correlations(hazard,out_dir):
+    VARS=[("hot_days_mean","HD"),("soil_moist_winter_mean","WSM"),("p30_days_mean","P30"),
+          ("Rx1day_mm_mean","Rx1μ"),("Rx1day_mm_max","Rx1max"),("Storm_Days_mean","SD"),
+          ("low_wind_days_mean","LWD")]
+    cols=[v for v,_ in VARS]; labels=[a for _,a in VARS]
+    U=_pseudo_observations(hazard,cols); X=hazard[cols].to_numpy(float)
+    mats=[pd.DataFrame(X,columns=cols).corr("spearman").values,
+          pd.DataFrame(X,columns=cols).corr("pearson").values,
+          pd.DataFrame(U,columns=cols).corr("spearman").values,
+          np.corrcoef(norm.ppf(U),rowvar=False)]
+    titles=["(a) Pooled rank","(b) Pooled linear","(c) Statewise PIT","(d) Elliptical-copula correlation"]
+    fig,axes=plt.subplots(1,4,figsize=(19,4.8)); im=None
+    for ax,M,tit in zip(axes,mats,titles):
+        im=ax.imshow(M,vmin=-1,vmax=1,cmap="RdBu_r")
+        ax.set_xticks(range(7)); ax.set_yticks(range(7)); ax.set_xticklabels(labels,rotation=45,ha="right"); ax.set_yticklabels(labels)
+        for i in range(7):
+            for j in range(7): ax.text(j,i,f"{M[i,j]:.2f}",ha="center",va="center",fontsize=8,color="white" if abs(M[i,j])>.5 else "black")
+        ax.set_title(tit)
+    fig.colorbar(im,ax=axes,shrink=.85,label="Correlation")
+    _save(fig,out_dir,"fig02_correlations")
+
+def fig_M0_M1_M2(static,hazard,m2,out_dir):
+    panel=build_baseline_panel(static,hazard); cols=[n for n,_,_ in INDICATOR_SYSTEM]
+    Yn=normalised_indicators(panel[cols].to_numpy(float),np.array([IS_COST[c] for c in cols]))
+    w0=np.zeros(len(cols))
+    for b in ("Climate","Energy","Adaptive"):
+        idx=[i for i,c in enumerate(cols) if BLOCK_OF[c]==b]; w0[idx]=1/3/len(idx)
+    cc0=topsis_cc(Yn,w0); rng=np.random.default_rng(RNG_SEED); cc1=[]
+    for _ in range(2000):
+        wb=sample_dirichlet_floor([1]*3,rng); w=np.zeros(len(cols))
+        for bi,b in enumerate(("Climate","Energy","Adaptive")):
+            idx=np.array([i for i,c in enumerate(cols) if BLOCK_OF[c]==b]); ww=sample_dirichlet_floor([1]*len(idx),rng); w[idx]=wb[bi]*ww
+        cc1.append(topsis_cc(Yn,w))
+    v=[1-cc0,1-np.mean(cc1,0),1-m2["cc_mean"]]; order=np.argsort(v[2]); x=np.arange(16); width=.27
+    fig,ax=plt.subplots(figsize=(12.5,5.2))
+    for k,(vals,lab) in enumerate(zip(v,["Deterministic TOPSIS (M0)","Weight uncertainty (M1)","Full REACT (M2)"])):
+        ax.bar(x+(k-1)*width,vals[order],width,label=lab,edgecolor="black",linewidth=.3)
+    ax.set_xticks(x); ax.set_xticklabels([STATE_ORDER[i] for i in order],rotation=45,ha="right"); ax.set_ylabel("Vulnerability (1 - CC)"); ax.legend(); ax.grid(axis="y",alpha=.25)
+    _save(fig,out_dir,"fig03_M0_M1_M2")
+
+def fig_scenario_3panel(result,scenario_name,fig_name,out_dir):
+    exp=np.asarray(result["expected_rank"]); acc=np.asarray(result["rank_accept"]); order=np.argsort(exp); states=[STATE_ORDER[i] for i in order]
+    fig=plt.figure(figsize=(10.8,7.5)); gs=fig.add_gridspec(2,2,height_ratios=[1,1.2],hspace=.9,wspace=.4)
+    a=fig.add_subplot(gs[0,:]); b=fig.add_subplot(gs[1,0]); c=fig.add_subplot(gs[1,1]); x=np.arange(16); bottom=np.zeros(16)
+    for r,lab in zip(range(4),["Rank 1","Rank 2","Rank 3","Rank 4"]):
+        val=100*acc[order,r]; a.bar(x,val,bottom=bottom,label=lab,edgecolor="white",linewidth=.3); bottom+=val
+    a.bar(x,100*acc[order,4:].sum(1),bottom=bottom,label="Other",edgecolor="white",linewidth=.3)
+    a.set_title(f"(a) {scenario_name}: rank acceptability"); a.set_ylabel("Probability (%)"); a.set_xticks(x); a.set_xticklabels(states,rotation=90); a.legend(ncol=5,loc="upper center",bbox_to_anchor=(.5,1.05),frameon=False)
+    y=np.arange(16); b.barh(y,exp[order]); b.set_yticks(y); b.set_yticklabels(states); b.invert_yaxis(); b.set_xlabel("Expected rank (lower = less vulnerable)"); b.set_title("(b) Expected rank")
+    dom=result["dominant"].iloc[order]; z=np.array([result["Z_resid"].loc[s,dom.loc[s]] for s in states]); p=np.array([result["P_dominance"].loc[s,dom.loc[s]] for s in states]); cls=result["classification"].iloc[order]
+    colors=[BLOCK_COLOR[d] if cl!="inconclusive" else COLOR_GRAY for d,cl in zip(dom,cls)]
+    c.barh(y,z,color=colors); c.axvline(0,color="black",linewidth=.8); c.set_yticks(y); c.set_yticklabels([]); c.invert_yaxis(); c.set_xlabel("Median residual Z (negative = relative weakness)"); c.set_title("(c) Candidate limiting dimension")
+    xmin=min(-2.5,float(z.min())-.2)
+    for yy,s,d,pp,cl in zip(y,states,dom,p,cls): c.text(xmin,yy,f"{BLOCK_LABEL_SHORT[d]}  P={pp:.2f}  {cl}",va="center",fontsize=7.4)
+    c.set_xlim(xmin,max(.6,float(z.max())+.2)); _save(fig,out_dir,fig_name)
+
+def fig_drivers(result,out_dir,suffix=""):
+    P=result["P_dominance"].copy(); core=P[["Climate","Energy","Adaptive"]]
+    P["dom"]=core.idxmax(axis=1); P["p"]=core.max(axis=1); P["o"]=P["dom"].map({"Climate":0,"Energy":1,"Adaptive":2}); P=P.sort_values(["o","p"],ascending=[True,False]); states=P.index
+    fig,ax=plt.subplots(figsize=(9.5,6.6)); y=np.arange(16); left=np.zeros(16)
+    for block in ("Climate","Energy","Adaptive"):
+        ax.barh(y,P[block],left=left,label=BLOCK_LABEL[block],color=BLOCK_COLOR[block],edgecolor="white"); left+=P[block].to_numpy()
+    ax.set_yticks(y); ax.set_yticklabels(states); ax.invert_yaxis(); ax.set_xlim(0,1); ax.set_xlabel("Selection probability under joint hazard, indicator-weight, and residual uncertainty"); ax.legend(ncol=3,loc="upper center",bbox_to_anchor=(.5,-.08)); ax.grid(axis="x",alpha=.25)
+    _save(fig,out_dir,f"fig05_drivers_robust{suffix}")
+
+def fig_scenario_sensitivity(base,npool,adj,out_dir):
+    db=npool["expected_rank"]-base["expected_rank"]; da=adj["expected_rank"]-base["expected_rank"]; order=np.argsort(base["expected_rank"])[::-1]; states=[STATE_ORDER[i] for i in order]; y=np.arange(16)
+    fig,ax=plt.subplots(figsize=(8,6.5)); ax.axvline(0,color="black")
+    for k,i in enumerate(order):
+        ax.plot([0,db[i]],[k-.15,k-.15]); ax.scatter(db[i],k-.15,label="National Pool" if k==0 else None)
+        ax.plot([0,da[i]],[k+.15,k+.15]); ax.scatter(da[i],k+.15,marker="s",label="Adjacency Flow" if k==0 else None)
+    ax.set_yticks(y); ax.set_yticklabels(states); ax.set_xlabel("Change in expected rank versus Baseline (+ = more vulnerable)"); ax.legend(); ax.grid(axis="x",alpha=.25); _save(fig,out_dir,"fig08_scenario_sensitivity_lollipop")
+
+def fig_resilience_function(out_dir):
+    r=np.linspace(-1,1,401); fig,ax=plt.subplots(figsize=(7.5,4.5)); ax.plot(r,[R_of_ri(x) for x in r],linewidth=2)
+    for cut in (-.5,-.1,.1,.3): ax.axvline(cut,linestyle="--",linewidth=.5)
+    ax.set_xlabel("Relative net-import indicator r_i (imports positive)"); ax.set_ylabel("Screening score R(r_i)"); ax.grid(alpha=.25); _save(fig,out_dir,"fig10_resilience_function")
+
+def fig_ri_vs_ci(static,out_dir):
+    code={"Baden-Württemberg":"BW","Bayern":"BY","Berlin":"BE","Brandenburg":"BB","Bremen":"HB","Hamburg":"HH","Hessen":"HE","Mecklenburg-Vorpommern":"MV","Niedersachsen":"NI","Nordrhein-Westfalen":"NRW","Rheinland-Pfalz":"RP","Saarland":"SL","Sachsen":"SN","Sachsen-Anhalt":"ST","Schleswig-Holstein":"SH","Thüringen":"TH"}
+    r=static["r_import"]; fig,ax=plt.subplots(figsize=(8.5,5.8)); ax.scatter(r,static["C_i"],s=90,edgecolor="black")
+    for s in static.index: ax.annotate(code[s],(r[s],static.loc[s,"C_i"]),xytext=(5,5),textcoords="offset points")
+    ax.axvline(0,linestyle="--",linewidth=.6); ax.set_xlabel("Relative net-import indicator r_i"); ax.set_ylabel("Interstate connectivity C_i"); ax.grid(alpha=.25); _save(fig,out_dir,"fig11_ri_vs_Ci")
+
+def fig_network(static,out_dir):
+    import networkx as nx
+    pos={"Schleswig-Holstein":(6.6,9.5),"Hamburg":(6.4,8.4),"Bremen":(4.6,7.6),"Niedersachsen":(5.6,6.9),"Mecklenburg-Vorpommern":(9.0,8.3),"Berlin":(10.2,6.5),"Brandenburg":(9.5,6.4),"Sachsen-Anhalt":(7.8,5.7),"Nordrhein-Westfalen":(2.7,5.5),"Hessen":(5.0,4.6),"Thüringen":(7.0,4.4),"Sachsen":(9.1,4.0),"Rheinland-Pfalz":(3.7,3.5),"Saarland":(2.9,2.7),"Baden-Württemberg":(5.1,1.7),"Bayern":(7.5,1.6)}
+    ab={"Schleswig-Holstein":"SH","Hamburg":"HH","Bremen":"HB","Niedersachsen":"NI","Mecklenburg-Vorpommern":"MV","Berlin":"BE","Brandenburg":"BB","Sachsen-Anhalt":"ST","Nordrhein-Westfalen":"NRW","Hessen":"HE","Thüringen":"TH","Sachsen":"SN","Rheinland-Pfalz":"RP","Saarland":"SL","Baden-Württemberg":"BW","Bayern":"BY"}
+    G=nx.Graph(); G.add_nodes_from(STATE_ORDER)
+    for s,nbs in ADJACENCY.items():
+        for n in nbs: G.add_edge(s,n)
+    ci=static.loc[STATE_ORDER,"C_i"]; ri=static.loc[STATE_ORDER,"r_import"]
+    sizes=[500+1100*ci[s] for s in G.nodes()]; colors=[COLOR_CLIMATE if ri[s]>.1 else COLOR_ADAPTIVE if ri[s]<-.1 else COLOR_GRAY for s in G.nodes()]
+    widths=[.6+2.2*np.sqrt(ci[u]*ci[v]) for u,v in G.edges()]
+    fig,ax=plt.subplots(figsize=(8.2,7.1)); nx.draw_networkx_edges(G,pos,ax=ax,width=widths,alpha=.45); nx.draw_networkx_nodes(G,pos,ax=ax,node_size=sizes,node_color=colors,edgecolors="black",linewidths=.7); nx.draw_networkx_labels(G,pos,labels=ab,font_size=9,font_weight="bold",ax=ax)
+    ax.set_title("Sixteen-node adjacency-support abstraction\n(node size = connectivity index; colour = net import/export position)"); ax.axis("off"); _save(fig,out_dir,"grid_16node_model")
+
+def write_scenario_results(r,scenario,out_dir):
+    P=r["P_dominance"]; dom=r["dominant"]
+    df=pd.DataFrame(index=STATE_ORDER)
+    df["CC_mean"]=r["cc_mean"]; df["Expected_rank"]=r["expected_rank"]; df["Dominant"]=dom; df["Class"]=r["classification"]
+    for b in P.columns:
+        df[f"P_{b}"]=P[b]; df[f"P_negative_{b}"]=r["P_negative"][b]; df[f"Median_Z_{b}"]=r["Z_resid"][b]
+    df["P_dominant"]=P.max(1); df.to_csv(os.path.join(out_dir,f"results_{scenario}.csv"))
+
+# =============================================================================
+# 11.  MAIN
+# =============================================================================
+def main(out_dir="REACT_revised_outputs"):
+    os.makedirs(out_dir,exist_ok=True); _setup_fonts(); hazard=load_hazard_panel(); static=load_static_panel().loc[STATE_ORDER]
+    input_audit(static,hazard).to_csv(os.path.join(out_dir,"input_audit.csv"),index=False)
+    fig_correlations(hazard,out_dir); fig_resilience_function(out_dir); fig_ri_vs_ci(static,out_dir); fig_network(static,out_dir)
+    results={}
+    for sc,name,fig in [("baseline","Baseline","fig04_baseline"),("national_pool","National Pool","fig06_national_pool"),("adjacency_flow","Adjacency Flow","fig07_adjacency_flow")]:
+        results[sc]=run_scenario(static,hazard,sc); write_scenario_results(results[sc],sc,out_dir); fig_scenario_3panel(results[sc],name,fig,out_dir)
+    fig_drivers(results["baseline"],out_dir); fig_scenario_sensitivity(results["baseline"],results["national_pool"],results["adjacency_flow"],out_dir); fig_M0_M1_M2(static,hazard,results["baseline"],out_dir)
+    fit=results["baseline"]["copula_fit"]
+    pd.DataFrame([{"selected_model":fit["model"],"df":fit["df"],"n_complete":fit["n_complete"],"AIC_Gaussian":fit["aic_gaussian"],"AIC_selected":fit["aic_selected"]}]).to_csv(os.path.join(out_dir,"copula_fit.csv"),index=False)
+    summary=pd.DataFrame(index=STATE_ORDER)
+    for sc,r in results.items(): summary[f"rank_{sc}"]=r["expected_rank"]; summary[f"driver_{sc}"]=r["dominant"]; summary[f"class_{sc}"]=r["classification"]; summary[f"P_{sc}"]=r["P_dominance"].max(1)
+    summary.to_csv(os.path.join(out_dir,"cross_scenario_summary.csv"))
+    print("\nCOPULA",fit["model"],fit["df"],"AIC",fit["aic_selected"],"vs Gaussian",fit["aic_gaussian"])
+    print(summary.to_string())
+
+
+# =============================================================================
+# Embedded validation routines: the released code contains every calibration
+# and validation analysis reported in the paper (Appendix H).
+# =============================================================================
+
+def run_null_calibration(noise_scale, n_panels=250, n_draws=2000,
+                         lambdas=(0.5,0.7,0.9), seed=31415):
+    """Derive certification thresholds from the synthetic no-signal null."""
+    rng=np.random.default_rng(seed); N,K=16,3
+    out={}
+    for lam in lambdas:
+        Ps,Ws,Zs,panel_min=[],[],[],[]
+        for _ in range(n_panels):
+            f=rng.normal(0,1,N)
+            B=np.column_stack([lam*f+0.5*rng.normal(0,1,N) for _ in range(K)])
+            R,SE=_residualise(B)
+            counts=np.zeros((N,K)); neg=np.zeros((N,K)); zs=np.zeros((n_draws,N,K))
+            for q in range(n_draws):
+                Rq=R+rng.normal(0,noise_scale*SE)
+                sd=Rq.std(0,ddof=0); sd=np.where(sd<1e-12,1,sd)
+                Z=(Rq-Rq.mean(0))/sd; zs[q]=Z
+                counts[np.arange(N),Z.argmin(1)]+=1; neg+=(Z<0)
+            P=counts/n_draws; W=neg/n_draws; med=np.median(zs,0)
+            dom=P.argmax(1); p=P.max(1); w=W[np.arange(N),dom]; z=med[np.arange(N),dom]
+            Ps.append(p); Ws.append(w); Zs.append(z)
+            m=(p>0.80)&(w>0.80); panel_min.append(z[m].min() if m.any() else np.inf)
+        P=np.concatenate(Ps); W=np.concatenate(Ws); Z=np.concatenate(Zs); n=len(P)
+        sg=(P>0.80)&(W>0.80); ig=(P>0.60)&(W>0.60)
+        zs_=np.sort(Z[sg]); k=int(0.05*n); z_s=zs_[k-1] if 1<=k<=len(zs_) else -np.inf
+        zi_=np.sort(Z[ig]); k2=int(0.20*n); z_i=zi_[k2-1] if 1<=k2<=len(zi_) else -np.inf
+        pm=np.sort(np.array(panel_min)); kf=int(0.05*len(pm))
+        z_f=pm[kf-1] if kf>=1 else -np.inf
+        out[lam]=(z_s,z_i,z_f)
+        print(f"  lambda={lam}: strong(5%)={z_s:+.3f}  indicative(20% cum)={z_i:+.3f}  FWER(5%)={z_f:+.3f}")
+    zs_f=min(v[0] for v in out.values()); zi_f=min(v[1] for v in out.values()); zf_f=min(v[2] for v in out.values())
+    print(f"FINAL thresholds at noise scale {noise_scale}: strong<{zs_f:+.2f}, indicative<{zi_f:+.2f}, FWER<{zf_f:+.2f}")
+    return zs_f, zi_f, zf_f
+
+def run_recovery(noise_scale, z_strong=-1.53, z_ind=-1.12, seed=202):
+    """Planted-shock recovery: dense (12/16) and sparse (2/16) designs."""
+    rng=np.random.default_rng(seed); N,K,n_draws=16,3,2000
+    def panel_stats(B):
+        R,SE=_residualise(B)
+        counts=np.zeros((N,K)); neg=np.zeros((N,K)); zs=np.zeros((n_draws,N,K))
+        for q in range(n_draws):
+            Rq=R+rng.normal(0,noise_scale*SE)
+            sd=Rq.std(0,ddof=0); sd=np.where(sd<1e-12,1,sd)
+            Z=(Rq-Rq.mean(0))/sd; zs[q]=Z
+            counts[np.arange(N),Z.argmin(1)]+=1; neg+=(Z<0)
+        P=counts/n_draws; W=neg/n_draws; med=np.median(zs,0)
+        dom=P.argmax(1)
+        return dom,P.max(1),W[np.arange(N),dom],med[np.arange(N),dom]
+    for design,n_shock in (("dense",12),("sparse",2)):
+        print(f"  {design} planting ({n_shock}/16 shocked):")
+        deltas=(0.4,0.8,1.2,1.6,2.0) if design=="dense" else (1.2,1.6,2.0)
+        for delta in deltas:
+            cor=ns=ni=tot=0
+            for _ in range(40):
+                f=rng.normal(0,1,N)
+                B=np.column_stack([0.7*f+0.5*rng.normal(0,1,N) for _ in range(K)])
+                idx=rng.choice(N,n_shock,replace=False); tgt=rng.integers(0,K,n_shock)
+                for j,i in enumerate(idx): B[i,tgt[j]]-=delta
+                dom,p,w,z=panel_stats(B)
+                cor+=(dom[idx]==tgt).sum(); tot+=n_shock
+                ns+=((p[idx]>0.80)&(w[idx]>0.80)&(z[idx]<z_strong)).sum()
+                ni+=((p[idx]>0.60)&(w[idx]>0.60)&(z[idx]<z_ind)
+                     &~((p[idx]>0.80)&(w[idx]>0.80)&(z[idx]<z_strong))).sum()
+            print(f"    delta={delta:.1f}: correct block {cor/tot:5.1%} | strong {ns/tot:5.1%} | indicative {ni/tot:5.1%}")
+
+if __name__=="__main__":
+    import argparse
+    p=argparse.ArgumentParser(description="REACT v4 consolidated pipeline")
+    p.add_argument("output_dir",nargs="?",default="REACT_v4_outputs")
+    p.add_argument("--mode",choices=("run","calibrate","recovery"),default="run")
+    p.add_argument("--fast",action="store_true")
+    p.add_argument("--mc",type=int); p.add_argument("--diagnostic",type=int)
+    p.add_argument("--seed",type=int,default=RNG_SEED)
+    p.add_argument("--energy-construct",choices=("demand_relative","absolute"),default="demand_relative")
+    p.add_argument("--thermal-coding",choices=("benefit","cost"),default="benefit")
+    p.add_argument("--adaptive-set",choices=("full","pruned"),default="full")
+    p.add_argument("--normalisation",choices=("minmax","rank"),default="minmax")
+    p.add_argument("--noise-scale",type=float,default=REGRESSION_NOISE_SCALE)
+    a=p.parse_args()
+    ENERGY_CONSTRUCT=a.energy_construct
+    NORMALISATION=a.normalisation
+    REGRESSION_NOISE_SCALE=a.noise_scale
+    if a.thermal_coding=="cost":
+        INDICATOR_SYSTEM[:]=[(n,b,("cost" if n=="Thermal_MW" else g)) for n,b,g in INDICATOR_SYSTEM]
+    if a.adaptive_set=="pruned":
+        INDICATOR_SYSTEM[:]=[(n,b,g) for n,b,g in INDICATOR_SYSTEM if n not in ("HDI","ADR")]
+    _rebuild_indicator_derivatives()
+    if a.fast: N_MONTE_CARLO=250; N_DIAGNOSTIC=1000
+    if a.mc: N_MONTE_CARLO=a.mc
+    if a.diagnostic: N_DIAGNOSTIC=a.diagnostic
+    RNG_SEED=a.seed
+    if a.mode=="calibrate":
+        run_null_calibration(a.noise_scale)
+    elif a.mode=="recovery":
+        run_recovery(a.noise_scale)
+    else:
+        print(f"[spec] construct={ENERGY_CONSTRUCT} thermal={a.thermal_coding} "
+              f"adaptive={a.adaptive_set} norm={NORMALISATION} noise={REGRESSION_NOISE_SCALE} "
+              f"M={N_MONTE_CARLO} Mw={N_DIAGNOSTIC} seed={RNG_SEED}")
+        main(a.output_dir)
