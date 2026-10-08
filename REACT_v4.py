@@ -1,4 +1,9 @@
-"""REACT v4 - consolidated final pipeline (single source of truth).
+"""REACT v4 - simulation engine and embedded input data.
+
+The manuscript specification (load-relative Energy System indicators, PRESS
+relative-weakness diagnostic, robustness analyses) is defined in
+REACT_ESR_reproducible.py, which imports this engine. The notes below describe
+the engine's stand-alone defaults and are retained for provenance.
 
 Headline specification (all decisions locked):
   * Energy construct: DEMAND-RELATIVE - the five physical Energy indicators
@@ -997,7 +1002,8 @@ def _residualise(B):
         others=[k for k in range(K) if k!=b]
         X=np.column_stack([np.ones(N),B[:,others]])
         beta=np.linalg.lstsq(X,B[:,b],rcond=None)[0]
-        resid=B[:,b]-X@beta        XtX_inv=np.linalg.pinv(X.T@X)
+        resid=B[:,b]-X@beta
+        XtX_inv=np.linalg.pinv(X.T@X)
         lev=np.einsum('ij,jk,ik->i',X,XtX_inv,X)
         sigma=np.sqrt(np.sum(resid**2)/max(N-X.shape[1],1))
         R[:,b]=resid

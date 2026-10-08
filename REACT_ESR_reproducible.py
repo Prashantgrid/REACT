@@ -2,23 +2,35 @@
 """Manuscript-aligned REACT reproducibility entry point.
 
 This module reuses the embedded data and simulation engine in ``REACT_v4.py``
-and replaces the final diagnostic/calibration stage with the specification in
-"Beyond Composite Rankings: A Probabilistic Multi-Domain Framework for
-Regional Energy Resilience".
+and defines the specification of "Beyond Composite Rankings: A Probabilistic
+Multi-Domain Assessment of Regional Energy Resilience" (Energy Strategy Reviews).
 
-Default specification
----------------------
-* absolute installed-capacity Energy indicators (demand-relative = sensitivity)
-* M=2000 hazard iterations
-* Mw=10000 profile draws
-* R=500 state-specific label-permutation replicates
-* seed=12345
+Principal specification
+-----------------------
+* Load-relative Energy System indicators:
+    wind, PV and thermal capacity   -> MW per MW of average load (D_annual/8760)
+    storage energy capacity         -> MWh per MW of average load (hours)
+    grid infrastructure (W_LINES)   -> index per km2 of state area (network density)
+    interstate connectivity C_i and external-support score S(r_i) unchanged
+  The support layer converts ratios back to MW, so deficit/flow physics are
+  construct-invariant. Absolute capacities and alternative grid normalisations
+  are sensitivity specifications (--energy-construct, --grid-normalisation).
+* M=2000 hazard iterations, Mw=10000 profile draws, seed=12345
 * PRESS/leave-one-state-out residual e_i/(1-h_i)
-* calibrated differentiation when q<=0.10, Psel>=0.70, and T>0
+* relative domain weakness when P_sel >= 0.70 and T > 0
+  (a within-state label-permutation check with BH adjustment is reported)
+
+Modes
+-----
+  run         main results for the three scenarios (default)
+  robustness  specification, threshold, panel-deletion, seed and redundancy checks
+  recovery    synthetic planted-deviation recovery
+  all         run + robustness + recovery
 """
 from __future__ import annotations
 
 import argparse
+import json
 import os
 from copy import deepcopy
 
@@ -30,7 +42,7 @@ import REACT_v4 as core
 
 N_MONTE_CARLO = 2000
 N_DIAGNOSTIC = 10000
-N_PERMUTATION = 500
+N_PERMUTATION = 5000
 RNG_SEED = 12345
 REGRESSION_NOISE_SCALE = 1.0
 RESIDUAL_MODE = "press"
@@ -104,7 +116,8 @@ def estimate_copula(hazard, hcols):
     """Compare Gaussian, Student-t, Clayton and Gumbel candidates by AIC."""
     from statsmodels.distributions.copula.api import GaussianCopula, StudentTCopula
 
-    key = (tuple(hcols), len(hazard), int(hazard["Year"].min()), int(hazard["Year"].max()))
+    key = (tuple(hcols), tuple(sorted(hazard["State"].unique())), len(hazard),
+           int(hazard["Year"].min()), int(hazard["Year"].max()))
     if key in _COPULA_CACHE:
         return _COPULA_CACHE[key]
 
@@ -270,6 +283,54 @@ def diagnose_blocks(block_iter, rng, n_perm=None):
     return P, W, med, lo, hi, T, p_perm, q_bh, calibrated
 
 
+
+# =============================================================================
+# Energy System construct
+# =============================================================================
+ENERGY_CONSTRUCT = "load_relative"      # or "absolute"
+GRID_NORMALISATION = "area"              # "area" | "demand" | "geomean" (load_relative only)
+
+# State land area, km2, 31.12.2023. Statistisches Bundesamt, GENESIS table 33111-0008
+# (Bodenflaeche nach Art der tatsaechlichen Nutzung, Bundeslaender).
+STATE_AREA_KM2 = {
+    "Baden-Württemberg": 35748, "Bayern": 70542, "Berlin": 891, "Brandenburg": 29654,
+    "Bremen": 420, "Hamburg": 755, "Hessen": 21116, "Mecklenburg-Vorpommern": 23293,
+    "Niedersachsen": 47710, "Nordrhein-Westfalen": 34113, "Rheinland-Pfalz": 19858,
+    "Saarland": 2572, "Sachsen": 18450, "Sachsen-Anhalt": 20555, "Schleswig-Holstein": 15804,
+    "Thüringen": 16202,
+}
+
+_ENGINE_BUILD = core.build_baseline_panel
+
+
+def average_load_mw(static):
+    """Average electricity load (MW) from annual consumption (TWh)."""
+    return static.loc[core.STATE_ORDER, "Cons_TWh"].astype(float).to_numpy() * 1e6 / 8760.0
+
+
+def build_panel(static, hazard):
+    """Structural indicator panel under the selected Energy System construct."""
+    core.ENERGY_CONSTRUCT = "absolute"
+    p = _ENGINE_BUILD(static, hazard)          # absolute values; engine sets CONS_VEC = 1
+    if ENERGY_CONSTRUCT == "absolute":
+        core.CONS_VEC = np.ones(len(core.STATE_ORDER))
+        return p
+    load = average_load_mw(static)
+    for c in ("Wind_MW", "Solar_MW", "Thermal_MW", "Storage_MWh"):
+        p[c] = p[c] / load                     # MW/MW and MWh/MW (= hours)
+    area = np.array([STATE_AREA_KM2[s] for s in core.STATE_ORDER], float)
+    if GRID_NORMALISATION == "area":
+        p["WLINES"] = p["WLINES"] / area * 1e3  # index per 1000 km2
+    elif GRID_NORMALISATION == "demand":
+        p["WLINES"] = p["WLINES"] / load * 1e3  # index per GW of average load
+    elif GRID_NORMALISATION == "geomean":
+        p["WLINES"] = p["WLINES"] / np.sqrt(area * load) * 1e3
+    else:
+        raise ValueError(GRID_NORMALISATION)
+    core.CONS_VEC = load                       # support layer converts ratios back to MW
+    return p.astype(float)
+
+
 def _configured_static():
     static = core.load_static_panel().loc[core.STATE_ORDER].copy()
     # Table H.10 value used in the ESR manuscript.
@@ -280,15 +341,15 @@ def _configured_static():
 def _configure_core():
     core.N_MONTE_CARLO = N_MONTE_CARLO
     core.RNG_SEED = RNG_SEED
-    core.ENERGY_CONSTRUCT = "absolute"
     core.NORMALISATION = "minmax"
     core.REGRESSION_NOISE_SCALE = REGRESSION_NOISE_SCALE
     core._residualise = _residualise
     core.estimate_copula = estimate_copula
+    core.build_baseline_panel = build_panel
 
 
-def run_scenario(static, hazard, scenario, verbose=True):
-    """Run the simulation engine, then replace the legacy classifier with the ESR diagnostic."""
+def run_scenario(static, hazard, scenario, verbose=True, n_perm=None):
+    """Run the simulation engine, then apply the ESR relative-weakness diagnostic."""
     _configure_core()
     capture = {}
     original_diag = core.diagnose_blocks
@@ -307,26 +368,40 @@ def run_scenario(static, hazard, scenario, verbose=True):
 
     rng = np.random.default_rng()
     rng.bit_generator.state = capture["state"]
-    P, W, med, lo, hi, T, p_perm, q_bh, calibrated = diagnose_blocks(result["block_iter"], rng)
+    P, W, med, lo, hi, T, p_perm, q_bh, calibrated = diagnose_blocks(result["block_iter"], rng, n_perm=n_perm)
     cols = ["Climate", "Energy", "Adaptive"]
-    Pdf = pd.DataFrame(P, index=core.STATE_ORDER, columns=cols)
-    Wdf = pd.DataFrame(W, index=core.STATE_ORDER, columns=cols)
-    Zdf = pd.DataFrame(med, index=core.STATE_ORDER, columns=cols)
+    idx = core.STATE_ORDER
+    Pdf = pd.DataFrame(P, index=idx, columns=cols)
     result["P_dominance"] = Pdf
-    result["P_negative"] = Wdf
-    result["Z_resid"] = Zdf
-    result["Z_resid_lo"] = pd.DataFrame(lo, index=core.STATE_ORDER, columns=cols)
-    result["Z_resid_hi"] = pd.DataFrame(hi, index=core.STATE_ORDER, columns=cols)
+    result["P_negative"] = pd.DataFrame(W, index=idx, columns=cols)
+    result["Z_resid"] = pd.DataFrame(med, index=idx, columns=cols)
+    result["Z_resid_lo"] = pd.DataFrame(lo, index=idx, columns=cols)
+    result["Z_resid_hi"] = pd.DataFrame(hi, index=idx, columns=cols)
     result["dominant"] = Pdf.idxmax(axis=1)
-    result["T_joint"] = pd.Series(T, index=core.STATE_ORDER)
-    result["p_permutation"] = pd.Series(p_perm, index=core.STATE_ORDER)
-    result["q_bh"] = pd.Series(q_bh, index=core.STATE_ORDER)
-    result["calibrated"] = pd.Series(calibrated, index=core.STATE_ORDER)
-    result["classification"] = pd.Series(np.where(calibrated, result["dominant"].to_numpy(), "Multidomain"), index=core.STATE_ORDER)
-    result["B_resid"] = pd.DataFrame(_residualise(result["B_blocks"].to_numpy())[0], index=core.STATE_ORDER, columns=cols)
+    result["P_sel"] = Pdf.max(axis=1)
+    result["T_joint"] = pd.Series(T, index=idx)
+    result["p_permutation"] = pd.Series(p_perm, index=idx)
+    result["q_bh"] = pd.Series(q_bh, index=idx)
+    identified = (result["P_sel"].to_numpy() >= 0.70) & (T > 0)
+    result["identified"] = pd.Series(identified, index=idx)
+    result["calibrated"] = pd.Series(calibrated, index=idx)
+    result["classification"] = pd.Series(np.where(identified, result["dominant"].to_numpy(), "Multidomain"), index=idx)
+    result["expected_rank"] = pd.Series(result["expected_rank"], index=idx)
+    result["cc_mean"] = pd.Series(result["cc_mean"], index=idx)
     if verbose:
-        print(f"{scenario}: {int(calibrated.sum())} calibrated state-domain profiles")
+        print(f"  {scenario}: identified = {list(result['classification'][identified].items())}")
     return result
+
+
+# =============================================================================
+# Outputs
+# =============================================================================
+SCENARIOS = ("baseline", "national_pool", "adjacency_flow")
+SCENARIO_LABEL = {"baseline": "Baseline", "national_pool": "National Pool", "adjacency_flow": "Adjacency Flow"}
+ABBR = {"Baden-Württemberg": "BW", "Bayern": "BY", "Berlin": "BE", "Brandenburg": "BB", "Bremen": "HB",
+        "Hamburg": "HH", "Hessen": "HE", "Mecklenburg-Vorpommern": "MV", "Niedersachsen": "NI",
+        "Nordrhein-Westfalen": "NRW", "Rheinland-Pfalz": "RP", "Saarland": "SL", "Sachsen": "SN",
+        "Sachsen-Anhalt": "ST", "Schleswig-Holstein": "SH", "Thüringen": "TH"}
 
 
 def write_scenario_results(result, scenario, out_dir):
@@ -340,12 +415,83 @@ def write_scenario_results(result, scenario, out_dir):
         df[f"P_{b}"] = P[b]
         df[f"P_negative_{b}"] = result["P_negative"][b]
         df[f"Median_Z_{b}"] = result["Z_resid"][b]
-    df["P_sel"] = P.max(axis=1)
+    df["P_sel"] = result["P_sel"]
     df["T_joint"] = result["T_joint"]
     df["p_permutation"] = result["p_permutation"]
     df["q_BH"] = result["q_bh"]
-    df["calibrated"] = result["calibrated"]
+    df["identified"] = result["identified"]
     df.to_csv(os.path.join(out_dir, f"results_{scenario}.csv"))
+
+
+def classification_audit(results):
+    rows = []
+    for sc in SCENARIOS:
+        r = results[sc]
+        for s in core.STATE_ORDER:
+            d = r["dominant"][s]
+            rows.append(dict(Scenario=SCENARIO_LABEL[sc], State=s, Provisional_domain=d,
+                             P_sel=r["P_sel"][s], W_candidate=r["P_negative"].loc[s, d],
+                             Median_Z_candidate=r["Z_resid"].loc[s, d], T_joint=r["T_joint"][s],
+                             p_permutation=r["p_permutation"][s], q_BH=r["q_bh"][s],
+                             identified=bool(r["identified"][s]),
+                             Classification=r["classification"][s], Expected_rank=r["expected_rank"][s]))
+    return pd.DataFrame(rows)
+
+
+def m0_m1_vulnerability(static, hazard, n_draws=2000):
+    """Deterministic TOPSIS (M0, equal domain weights) and weight uncertainty only (M1)."""
+    _configure_core()
+    panel = core.build_baseline_panel(static, hazard)
+    cols = [n for n, _, _ in core.INDICATOR_SYSTEM]
+    Yn = core.normalised_indicators(panel[cols].to_numpy(float), np.array([core.IS_COST[c] for c in cols]))
+    w0 = np.zeros(len(cols))
+    for b in ("Climate", "Energy", "Adaptive"):
+        idx = [i for i, c in enumerate(cols) if core.BLOCK_OF[c] == b]
+        w0[idx] = 1 / 3 / len(idx)
+    cc0 = core.topsis_cc(Yn, w0)
+    rng = np.random.default_rng(RNG_SEED)
+    cc1 = []
+    for _ in range(n_draws):
+        wb = core.sample_dirichlet_floor([1] * 3, rng)
+        w = np.zeros(len(cols))
+        for bi, b in enumerate(("Climate", "Energy", "Adaptive")):
+            idx = np.array([i for i, c in enumerate(cols) if core.BLOCK_OF[c] == b])
+            w[idx] = wb[bi] * core.sample_dirichlet_floor([1] * len(idx), rng)
+        cc1.append(core.topsis_cc(Yn, w))
+    return pd.Series(1 - cc0, index=core.STATE_ORDER), pd.Series(1 - np.mean(cc1, 0), index=core.STATE_ORDER), panel
+
+
+def indicator_ranks(panel):
+    """Direction-adjusted ranks of the structural indicators (1 = most favourable; ties averaged)."""
+    from scipy.stats import rankdata
+    out = pd.DataFrame(index=panel.index)
+    for n, b, g in core.INDICATOR_SYSTEM:
+        v = panel[n].to_numpy(float)
+        out[n] = rankdata(v if g == "cost" else -v, method="average")
+    return out
+
+
+def write_figure_data(results, m0, m1, out_dir):
+    fd = os.path.join(out_dir, "figure_data")
+    os.makedirs(fd, exist_ok=True)
+    base = results["baseline"]
+    m2 = 1 - base["cc_mean"]
+    order = m2.sort_values().index
+    json.dump({ABBR[s]: {"M0": round(float(m0[s]), 4), "M1": round(float(m1[s]), 4), "M2": round(float(m2[s]), 4)}
+               for s in order}, open(os.path.join(fd, "m012.json"), "w"), indent=1)
+    acc = pd.DataFrame(base["rank_accept"], index=core.STATE_ORDER)
+    order = base["expected_rank"].sort_values().index
+    json.dump({ABBR[s]: [round(100 * float(acc.loc[s, k]), 2) for k in range(4)] for s in order},
+              open(os.path.join(fd, "rank_accept.json"), "w"), indent=1)
+    dom_name = {"Climate": "Climate", "Energy": "Energy", "Adaptive": "Socio-econ."}
+    prof = {}
+    for s in order:
+        prof[ABBR[s]] = {SCENARIO_LABEL[sc]: dict(domain=dom_name[results[sc]["dominant"][s]],
+                                                  psel=round(float(results[sc]["P_sel"][s]), 3),
+                                                  z=round(float(results[sc]["Z_resid"].loc[s, results[sc]["dominant"][s]]), 3),
+                                                  identified=bool(results[sc]["identified"][s]))
+                         for sc in SCENARIOS}
+    json.dump(prof, open(os.path.join(fd, "domain_profiles.json"), "w"), indent=1)
 
 
 def run_all(out_dir="REACT_ESR_outputs"):
@@ -353,9 +499,12 @@ def run_all(out_dir="REACT_ESR_outputs"):
     hazard = core.load_hazard_panel()
     static = _configured_static()
     results = {}
-    for scenario in ("baseline", "national_pool", "adjacency_flow"):
+    print(f"[spec] construct={ENERGY_CONSTRUCT} grid={GRID_NORMALISATION} M={N_MONTE_CARLO} "
+          f"Mw={N_DIAGNOSTIC} R={N_PERMUTATION} seed={RNG_SEED}")
+    for scenario in SCENARIOS:
         results[scenario] = run_scenario(static, hazard, scenario)
         write_scenario_results(results[scenario], scenario, out_dir)
+    classification_audit(results).to_csv(os.path.join(out_dir, "classification_audit.csv"), index=False)
 
     fit = results["baseline"]["copula_fit"]
     pd.DataFrame([{
@@ -370,22 +519,313 @@ def run_all(out_dir="REACT_ESR_outputs"):
         summary[f"rank_{sc}"] = r["expected_rank"]
         summary[f"provisional_{sc}"] = r["dominant"]
         summary[f"class_{sc}"] = r["classification"]
-        summary[f"Psel_{sc}"] = r["P_dominance"].max(axis=1)
+        summary[f"Psel_{sc}"] = r["P_sel"]
         summary[f"T_{sc}"] = r["T_joint"]
-        summary[f"q_{sc}"] = r["q_bh"]
     summary.to_csv(os.path.join(out_dir, "cross_scenario_summary.csv"))
+
+    from scipy.stats import spearmanr, pearsonr
+    rows = []
+    for a, b in (("baseline", "national_pool"), ("baseline", "adjacency_flow"), ("national_pool", "adjacency_flow")):
+        rows.append(dict(pair=f"{a}~{b}", spearman=spearmanr(results[a]["expected_rank"], results[b]["expected_rank"]).statistic))
+    pd.DataFrame(rows).to_csv(os.path.join(out_dir, "scenario_rank_correlations.csv"), index=False)
+
+    m0, m1, panel = m0_m1_vulnerability(static, hazard)
+    pd.DataFrame({"M0": m0, "M1": m1, "M2": 1 - results["baseline"]["cc_mean"]}).to_csv(os.path.join(out_dir, "m0_m1_m2_vulnerability.csv"))
+    panel.to_csv(os.path.join(out_dir, "structural_indicator_panel.csv"))
+    indicator_ranks(panel).to_csv(os.path.join(out_dir, "indicator_ranks.csv"))
+    B = results["baseline"]["B_blocks"]
+    B.to_csv(os.path.join(out_dir, "domain_scores_baseline.csv"))
+    corr = []
+    for a, b in (("Climate", "Energy"), ("Climate", "Adaptive"), ("Energy", "Adaptive")):
+        corr.append(dict(pair=f"{a}~{b}", pearson=pearsonr(B[a], B[b]).statistic, spearman=spearmanr(B[a], B[b]).statistic))
+    pd.DataFrame(corr).to_csv(os.path.join(out_dir, "domain_score_correlations.csv"), index=False)
+    write_figure_data(results, m0, m1, out_dir)
     return results
 
 
+# =============================================================================
+# Robustness analyses
+# =============================================================================
+HEADLINE_RULE = 0.70
+
+
+def _with_spec(fn, **spec):
+    """Run fn() under temporary module-level specification changes."""
+    global ENERGY_CONSTRUCT, GRID_NORMALISATION
+    saved = dict(construct=ENERGY_CONSTRUCT, grid=GRID_NORMALISATION,
+                 derating=deepcopy(core.PARAMS_DERATING), system=list(core.INDICATOR_SYSTEM),
+                 dirichlet=core.sample_dirichlet_floor, blocks=deepcopy(core.BLOCK_INDICATORS))
+    try:
+        if "construct" in spec:
+            ENERGY_CONSTRUCT = spec["construct"]
+        if "grid" in spec:
+            GRID_NORMALISATION = spec["grid"]
+        if "derating" in spec:
+            core.PARAMS_DERATING.clear(); core.PARAMS_DERATING.update(spec["derating"])
+        if spec.get("thermal_cost"):
+            core.INDICATOR_SYSTEM[:] = [(n, b, ("cost" if n == "Thermal_MW" else g)) for n, b, g in core.INDICATOR_SYSTEM]
+            core._rebuild_indicator_derivatives()
+        if spec.get("equal_weights"):
+            core.sample_dirichlet_floor = lambda alpha, rng, **k: np.full(len(alpha), 1.0 / len(alpha))
+        if "blocks" in spec:
+            core.BLOCK_INDICATORS = spec["blocks"]
+        return fn()
+    finally:
+        ENERGY_CONSTRUCT, GRID_NORMALISATION = saved["construct"], saved["grid"]
+        core.PARAMS_DERATING.clear(); core.PARAMS_DERATING.update(saved["derating"])
+        core.INDICATOR_SYSTEM[:] = saved["system"]; core._rebuild_indicator_derivatives()
+        core.sample_dirichlet_floor = saved["dirichlet"]
+        core.BLOCK_INDICATORS = saved["blocks"]
+
+
+LOW_RESPONSE = {"PV": dict(beta=0.05, delta_max=0.05), "Thermal": dict(alpha=0.10, beta=0.05, delta_max=0.15),
+                "Grid": dict(beta=0.05, delta_max=0.05, gamma=0.10), "Wind": dict(beta=0.20, delta_max=0.20)}
+HIGH_RESPONSE = {"PV": dict(beta=0.15, delta_max=0.15), "Thermal": dict(alpha=0.20, beta=0.15, delta_max=0.35),
+                 "Grid": dict(beta=0.15, delta_max=0.15, gamma=0.30), "Wind": dict(beta=0.40, delta_max=0.40)}
+SPECIFICATIONS = {
+    "main": {},
+    "absolute_capacities": dict(construct="absolute"),
+    "grid_per_demand": dict(grid="demand"),
+    "grid_geometric_mean": dict(grid="geomean"),
+    "equal_weights": dict(equal_weights=True),
+    "low_hazard_response": dict(derating=LOW_RESPONSE),
+    "high_hazard_response": dict(derating=HIGH_RESPONSE),
+    "thermal_as_cost": dict(thermal_cost=True),
+}
+
+
+def _three_scenarios(static, hazard, n_perm=20):
+    return {sc: run_scenario(static, hazard, sc, verbose=False, n_perm=n_perm) for sc in SCENARIOS}
+
+
+def specification_sensitivity(static, hazard, main_results, out_dir):
+    from scipy.stats import spearmanr
+    rows = []
+    for name, spec in SPECIFICATIONS.items():
+        res = main_results if name == "main" else _with_spec(lambda: _three_scenarios(static, hazard), **spec)
+        for sc in SCENARIOS:
+            r = res[sc]
+            rho = spearmanr(r["expected_rank"], main_results[sc]["expected_rank"]).statistic
+            for s in core.STATE_ORDER:
+                rows.append(dict(specification=name, scenario=SCENARIO_LABEL[sc], state=s,
+                                 provisional=r["dominant"][s], P_sel=r["P_sel"][s], T=r["T_joint"][s],
+                                 identified=bool(r["identified"][s]), expected_rank=r["expected_rank"][s],
+                                 rank_rho_vs_main=rho))
+        print(f"  spec {name}: done", flush=True)
+    df = pd.DataFrame(rows)
+    df.to_csv(os.path.join(out_dir, "robustness_specifications.csv"), index=False)
+    return df
+
+
+def threshold_sweep(audit, out_dir):
+    rows = []
+    for tau in (0.60, 0.65, 0.70, 0.75, 0.80):
+        f = audit[(audit.P_sel >= tau) & (audit.T_joint > 0)]
+        for (state, dom), g in f.groupby(["State", "Provisional_domain"]):
+            rows.append(dict(threshold=tau, state=state, domain=dom, n_scenarios=len(g),
+                             scenarios="; ".join(g.Scenario)))
+        rows.append(dict(threshold=tau, state="__total__", domain="", n_scenarios=len(f), scenarios=""))
+    df = pd.DataFrame(rows)
+    df.to_csv(os.path.join(out_dir, "robustness_threshold_sweep.csv"), index=False)
+    return df
+
+
+def panel_deletion(static, hazard, main_results, out_dir, scenarios=SCENARIOS):
+    full = list(core.STATE_ORDER)
+    rows = []
+    try:
+        for d in full:
+            core.STATE_ORDER = [s for s in full if s != d]
+            st = static.loc[core.STATE_ORDER]
+            hz = hazard[hazard["State"] != d].reset_index(drop=True)
+            for sc in scenarios:
+                r = run_scenario(st, hz, sc, verbose=False, n_perm=20)
+                for s in core.STATE_ORDER:
+                    rows.append(dict(deleted=d, scenario=SCENARIO_LABEL[sc], state=s,
+                                     provisional=r["dominant"][s], provisional_full=main_results[sc]["dominant"][s],
+                                     P_sel=r["P_sel"][s], T=r["T_joint"][s], identified=bool(r["identified"][s]),
+                                     identified_full=bool(main_results[sc]["identified"][s])))
+            print(f"  panel deletion {d}: done", flush=True)
+    finally:
+        core.STATE_ORDER = full
+    df = pd.DataFrame(rows)
+    df.to_csv(os.path.join(out_dir, "robustness_panel_deletion.csv"), index=False)
+    return df
+
+
+def seed_replicas(static, hazard, out_dir, seeds=(12345, 999, 7, 42, 2025)):
+    global RNG_SEED
+    from scipy.stats import spearmanr
+    saved = RNG_SEED
+    rows = []
+    try:
+        for seed in seeds:
+            RNG_SEED = seed
+            for sc in SCENARIOS:
+                r = run_scenario(static, hazard, sc, verbose=False, n_perm=20)
+                for s in core.STATE_ORDER:
+                    rows.append(dict(seed=seed, scenario=SCENARIO_LABEL[sc], state=s, expected_rank=r["expected_rank"][s],
+                                     provisional=r["dominant"][s], P_sel=r["P_sel"][s], T=r["T_joint"][s],
+                                     identified=bool(r["identified"][s])))
+            print(f"  seed {seed}: done", flush=True)
+    finally:
+        RNG_SEED = saved
+    df = pd.DataFrame(rows)
+    df.to_csv(os.path.join(out_dir, "robustness_seed_replicas.csv"), index=False)
+    summ = []
+    for sc in SCENARIOS:
+        g = df[df.scenario == SCENARIO_LABEL[sc]]
+        er = g.pivot(index="state", columns="seed", values="expected_rank")
+        ps = g.pivot(index="state", columns="seed", values="P_sel")
+        dm = g.pivot(index="state", columns="seed", values="provisional")
+        idf = g.pivot(index="state", columns="seed", values="identified")
+        rhos = [spearmanr(er[a], er[b]).statistic for i, a in enumerate(seeds) for b in seeds[i + 1:]]
+        summ.append(dict(scenario=SCENARIO_LABEL[sc], sd_max_expected_rank=er.std(axis=1, ddof=1).max(),
+                         sd_max_Psel=ps.std(axis=1, ddof=1).max(), min_rank_rho=min(rhos),
+                         same_provisional=int((dm.nunique(axis=1) == 1).sum()),
+                         same_classification=int((idf.nunique(axis=1) == 1).sum())))
+    pd.DataFrame(summ).to_csv(os.path.join(out_dir, "robustness_seed_summary.csv"), index=False)
+    return df
+
+
+def redundancy(static, hazard, main_results, out_dir):
+    """Within-domain VIF and correlation-cluster indicator reduction."""
+    from scipy.stats import spearmanr
+    _configure_core()
+    panel = core.build_baseline_panel(static, hazard)
+    vif_rows = []
+    for b, names in core.BLOCK_INDICATORS.items():
+        X = panel[names].to_numpy(float)
+        X = (X - X.mean(0)) / X.std(0)
+        for j, n in enumerate(names):
+            others = [k for k in range(len(names)) if k != j]
+            A = np.column_stack([np.ones(len(X)), X[:, others]])
+            beta = np.linalg.lstsq(A, X[:, j], rcond=None)[0]
+            res = X[:, j] - A @ beta
+            r2 = 1 - res.var() / X[:, j].var()
+            vif_rows.append(dict(domain=b, indicator=n, VIF=1 / max(1 - r2, 1e-9)))
+    pd.DataFrame(vif_rows).to_csv(os.path.join(out_dir, "robustness_vif_within_domain.csv"), index=False)
+
+    # Energy System VIF under the load-relative and absolute constructs
+    def _energy_vif():
+        _configure_core()
+        pe = core.build_baseline_panel(static, hazard)
+        names = core.BLOCK_INDICATORS["Energy"]
+        X = pe[names].to_numpy(float); X = (X - X.mean(0)) / X.std(0)
+        out = {}
+        for j, n in enumerate(names):
+            A = np.column_stack([np.ones(len(X)), np.delete(X, j, 1)])
+            beta = np.linalg.lstsq(A, X[:, j], rcond=None)[0]
+            r2 = 1 - (X[:, j] - A @ beta).var() / X[:, j].var()
+            out[n] = 1 / max(1 - r2, 1e-9)
+        return pd.Series(out)
+    pd.DataFrame({"load_relative": _with_spec(_energy_vif, construct="load_relative"),
+                  "absolute": _with_spec(_energy_vif, construct="absolute")}).to_csv(
+        os.path.join(out_dir, "robustness_vif_energy_by_construct.csv"))
+
+    # Maximum leverage in the three relative-weakness regressions (Baseline mean domain scores)
+    B = main_results["baseline"]["B_blocks"].to_numpy(float)
+    lev = []
+    for b, name in enumerate(("Climate", "Energy", "Adaptive")):
+        X = np.column_stack([np.ones(len(B)), np.delete(B, b, 1)])
+        h = np.diag(X @ np.linalg.pinv(X.T @ X) @ X.T)
+        lev.append(dict(regression=name, max_leverage=h.max(), state=main_results["baseline"]["B_blocks"].index[h.argmax()]))
+    pd.DataFrame(lev).to_csv(os.path.join(out_dir, "regression_leverage.csv"), index=False)
+
+    base_rank = main_results["baseline"]["expected_rank"]
+    rows = []
+    for tau in (0.5, 0.6, 0.7, 0.8, 0.9):
+        kept = {}
+        for b, names in core.BLOCK_INDICATORS.items():
+            rho = panel[names].corr(method="spearman").abs().to_numpy()
+            remaining, keep = list(range(len(names))), []
+            while remaining:                         # connected components of |rho| > tau
+                comp, stack = set(), [remaining[0]]
+                while stack:
+                    i = stack.pop()
+                    if i in comp:
+                        continue
+                    comp.add(i)
+                    stack += [k for k in remaining if k not in comp and rho[i, k] > tau]
+                keep.append(min(comp))                # retain the first-listed member
+                remaining = [k for k in remaining if k not in comp]
+            kept[b] = [names[k] for k in sorted(keep)]
+        n_kept = sum(len(v) for v in kept.values())
+        r = _with_spec(lambda: run_scenario(static, hazard, "baseline", verbose=False, n_perm=20), blocks=kept)
+        rk_full = base_rank.rank(); rk_red = r["expected_rank"].rank()
+        shift = (rk_full - rk_red).abs()
+        rows.append(dict(tau=tau, n_kept=n_kept, kept="; ".join(sum(kept.values(), [])),
+                         rho=spearmanr(base_rank, r["expected_rank"]).statistic,
+                         max_shift=shift.max(), mean_shift=shift.mean(),
+                         identified="; ".join(f"{s}:{r['dominant'][s]}" for s in core.STATE_ORDER if r["identified"][s])))
+        print(f"  redundancy tau={tau}: n_kept={n_kept}", flush=True)
+    df = pd.DataFrame(rows)
+    df.to_csv(os.path.join(out_dir, "robustness_indicator_reduction.csv"), index=False)
+    return df
+
+
+def run_robustness(out_dir, main_results=None):
+    os.makedirs(out_dir, exist_ok=True)
+    hazard = core.load_hazard_panel()
+    static = _configured_static()
+    if main_results is None:
+        main_results = _three_scenarios(static, hazard)
+    audit = classification_audit(main_results)
+    threshold_sweep(audit, out_dir)
+    specification_sensitivity(static, hazard, main_results, out_dir)
+    redundancy(static, hazard, main_results, out_dir)
+    seed_replicas(static, hazard, out_dir)
+    panel_deletion(static, hazard, main_results, out_dir)
+
+
+# =============================================================================
+# Synthetic recovery of planted domain deviations
+# =============================================================================
+def run_recovery(out_dir, deltas=(0.10, 0.20, 0.40, 0.80, 1.20), n_panels=200, n_draws=2000,
+                 n_shocked=12, loading=0.7, noise=0.5, seed=202):
+    """Planted negative deviations in 12 of 16 regions; PRESS residuals and the P_sel/T rule."""
+    rng = np.random.default_rng(seed)
+    N, K = 16, 3
+    rows = []
+    for delta in deltas:
+        correct = ident_correct = total = 0
+        for _ in range(n_panels):
+            f = rng.normal(0, 1, N)
+            B = np.column_stack([loading * f + noise * rng.normal(0, 1, N) for _ in range(K)])
+            idx = rng.choice(N, n_shocked, replace=False)
+            tgt = rng.integers(0, K, n_shocked)
+            B[idx, tgt] -= delta * B.std(axis=0)[tgt]
+            R, SE = _residualise(B)
+            Rq = R[None] + rng.normal(0, 1, (n_draws, N, K)) * SE[None]
+            sd = Rq.std(axis=1, keepdims=True)
+            z = (Rq - Rq.mean(axis=1, keepdims=True)) / np.where(sd < 1e-12, 1, sd)
+            win = z.argmin(axis=2)
+            P = np.stack([(win == b).mean(axis=0) for b in range(K)], axis=1)
+            cand = P.argmax(axis=1); psel = P.max(axis=1); med = np.median(z, axis=0)
+            T = np.array([_joint_statistic(med[i], int(cand[i])) for i in range(N)])
+            ok = cand[idx] == tgt
+            correct += int(ok.sum())
+            ident_correct += int((ok & (psel[idx] >= HEADLINE_RULE) & (T[idx] > 0)).sum())
+            total += n_shocked
+        rows.append(dict(delta=delta, provisional_correct=correct / total, identified_correct=ident_correct / total))
+        print(f"  recovery delta={delta}: provisional {correct / total:.1%}, identified {ident_correct / total:.1%}", flush=True)
+    df = pd.DataFrame(rows)
+    df.to_csv(os.path.join(out_dir, "recovery_planted_deviation.csv"), index=False)
+    return df
+
+
 def main():
-    global N_MONTE_CARLO, N_DIAGNOSTIC, N_PERMUTATION, RNG_SEED, RESIDUAL_MODE
+    global N_MONTE_CARLO, N_DIAGNOSTIC, N_PERMUTATION, RNG_SEED, RESIDUAL_MODE, ENERGY_CONSTRUCT, GRID_NORMALISATION
     p = argparse.ArgumentParser(description="REACT ESR reproducibility pipeline")
     p.add_argument("output_dir", nargs="?", default="REACT_ESR_outputs")
+    p.add_argument("--mode", choices=("run", "robustness", "recovery", "all"), default="run")
     p.add_argument("--fast", action="store_true")
     p.add_argument("--mc", type=int)
     p.add_argument("--diagnostic", type=int)
     p.add_argument("--permutations", type=int)
     p.add_argument("--seed", type=int, default=12345)
+    p.add_argument("--energy-construct", choices=("load_relative", "absolute"), default="load_relative")
+    p.add_argument("--grid-normalisation", choices=("area", "demand", "geomean"), default="area")
     p.add_argument("--residual-mode", choices=("press", "legacy"), default="press")
     args = p.parse_args()
     if args.fast:
@@ -398,7 +838,15 @@ def main():
         N_PERMUTATION = args.permutations
     RNG_SEED = args.seed
     RESIDUAL_MODE = args.residual_mode
-    run_all(args.output_dir)
+    ENERGY_CONSTRUCT = args.energy_construct
+    GRID_NORMALISATION = args.grid_normalisation
+    main_results = None
+    if args.mode in ("run", "all"):
+        main_results = run_all(args.output_dir)
+    if args.mode in ("robustness", "all"):
+        run_robustness(os.path.join(args.output_dir, "robustness"), main_results)
+    if args.mode in ("recovery", "all"):
+        run_recovery(os.path.join(args.output_dir, "robustness"))
 
 
 if __name__ == "__main__":
