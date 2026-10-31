@@ -1,0 +1,49 @@
+scenario,state,expected_rank,p_top3,p_bottom3,rank_q05,rank_q95
+Baseline,Hamburg,6.033,0.443,0.1105,1.0,15.0
+Baseline,Bayern,7.8795,0.283,0.209,2.0,16.0
+Baseline,Hessen,7.4055,0.176,0.08,2.0,14.0
+Baseline,Baden-Württemberg,8.2355,0.2965,0.2455,1.0,16.0
+Baseline,Niedersachsen,6.9775,0.116,0.0215,3.0,12.0
+Baseline,Bremen,5.448,0.3505,0.0345,1.0,13.0
+Baseline,Nordrhein-Westfalen,9.7895,0.0355,0.2055,4.0,16.0
+Baseline,Berlin,8.1795,0.223,0.224,2.0,16.0
+Baseline,Schleswig-Holstein,7.46,0.2155,0.06,1.0,14.0
+Baseline,Rheinland-Pfalz,10.1385,0.0135,0.1595,5.0,16.0
+Baseline,Saarland,9.355,0.102,0.141,2.0,15.0
+Baseline,Thüringen,10.102,0.084,0.307,3.0,15.0
+Baseline,Brandenburg,7.8255,0.3025,0.1305,1.0,15.0
+Baseline,Mecklenburg-Vorpommern,8.627,0.241,0.269,1.0,15.0
+Baseline,Sachsen,9.51,0.1145,0.1945,2.0,15.0
+Baseline,Sachsen-Anhalt,13.034,0.0035,0.608,6.0,16.0
+National Pool,Hamburg,5.231,0.5125,0.089,1.0,15.0
+National Pool,Bayern,8.128,0.2585,0.231,2.0,15.0
+National Pool,Hessen,7.079,0.1735,0.052,2.0,14.0
+National Pool,Baden-Württemberg,8.6805,0.257,0.289,1.0,16.0
+National Pool,Niedersachsen,6.6495,0.083,0.001,3.0,10.0
+National Pool,Bremen,4.7205,0.469,0.0275,1.0,12.0
+National Pool,Nordrhein-Westfalen,9.572,0.0245,0.1595,5.0,15.0
+National Pool,Berlin,8.5555,0.179,0.2275,2.0,16.0
+National Pool,Schleswig-Holstein,7.026,0.2565,0.0515,1.0,14.0
+National Pool,Rheinland-Pfalz,10.014,0.0095,0.1205,6.0,15.0
+National Pool,Saarland,9.578,0.081,0.131,3.0,15.0
+National Pool,Thüringen,10.1785,0.0715,0.2895,3.0,15.0
+National Pool,Brandenburg,8.1745,0.2765,0.138,1.0,15.0
+National Pool,Mecklenburg-Vorpommern,8.273,0.252,0.2185,1.0,15.0
+National Pool,Sachsen,10.454,0.0955,0.292,3.0,15.0
+National Pool,Sachsen-Anhalt,13.686,0.0005,0.6825,7.0,16.0
+Adjacency Flow,Hamburg,4.96,0.5215,0.057,1.0,14.0
+Adjacency Flow,Bayern,8.273,0.2555,0.232,2.0,15.0
+Adjacency Flow,Hessen,6.853,0.1875,0.037,2.0,13.0
+Adjacency Flow,Baden-Württemberg,8.834,0.258,0.3045,1.0,16.0
+Adjacency Flow,Niedersachsen,6.567,0.092,0.0005,3.0,11.0
+Adjacency Flow,Bremen,4.565,0.4815,0.0205,1.0,11.049999999999955
+Adjacency Flow,Nordrhein-Westfalen,9.165,0.0285,0.115,4.0,15.0
+Adjacency Flow,Berlin,8.699,0.177,0.2405,2.0,16.0
+Adjacency Flow,Schleswig-Holstein,7.058,0.261,0.053,1.0,14.0
+Adjacency Flow,Rheinland-Pfalz,10.8595,0.005,0.232,6.0,16.0
+Adjacency Flow,Saarland,9.382,0.088,0.111,3.0,14.0
+Adjacency Flow,Thüringen,10.412,0.0465,0.2995,4.0,15.0
+Adjacency Flow,Brandenburg,8.0395,0.264,0.1235,1.0,15.0
+Adjacency Flow,Mecklenburg-Vorpommern,8.2185,0.249,0.2185,1.0,15.0
+Adjacency Flow,Sachsen,10.516,0.0845,0.286,3.0,15.0
+Adjacency Flow,Sachsen-Anhalt,13.5985,0.0005,0.6695,6.950000000000003,16.0

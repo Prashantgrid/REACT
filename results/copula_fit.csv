@@ -1,0 +1,2 @@
+selected_model,df,n_complete,AIC_Gaussian,AIC_Student_t,AIC_Clayton,AIC_Gumbel,AIC_selected
+student_t,8.0,544,-958.4663787412517,-1037.5890711686554,-89.74117347786301,-101.30897411579244,-1037.5890711686554

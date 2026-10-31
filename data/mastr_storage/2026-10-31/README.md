@@ -102,9 +102,9 @@ values, not independently measured or comprehensively network-operator-verified
 capacities. Raw extreme values are not silently capped; inspect unusual values before
 using the tables in a model. Registration delays and later corrections can affect totals.
 
-This additional 2026 snapshot is kept separate from the existing manuscript inputs.
-Using it for a revised historical baseline requires an explicit reference-date decision;
-commissioning dates in today's register do not reconstruct the complete historical stock.
+This 2026 snapshot is used only as a later-date sensitivity. The revised manuscript's
+main battery input uses the archived 1 October 2025 export. Commissioning dates in
+a later register do not reconstruct the complete historical stock.
 
 ## Reproduce
 

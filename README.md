@@ -1,149 +1,128 @@
-# REACT: probabilistic multi-domain regional energy resilience
+# REACT: revised Energy Strategy Reviews manuscript
 
-Reproducibility code for the manuscript **"Beyond Composite Rankings: A Probabilistic Multi-Domain
-Assessment of Regional Energy Resilience"** (Energy Strategy Reviews).
+Reproducibility code for **Beyond Composite Rankings: A Probabilistic Multi-Domain
+Assessment of Regional Energy Resilience**, ESR-D-26-03728.
 
-REACT combines compound-hazard simulation, climate-driven derating of energy-system indicators,
-uncertain-weight TOPSIS, three spatial stress-and-support scenarios, and a relative-weakness
-diagnostic based on leave-one-state-out (PRESS) residuals and a selection-stability criterion.
+The main battery indicator now uses **one archived MaStR export, 1 October 2025,
+for all 16 states**. No state uses an interpolated or PV-proportional battery value.
+The later 31 October 2026 export is a separately dated sensitivity.
 
-## Repository structure
-
-- `REACT_v4.py` — embedded hazard and structural data and the Monte Carlo simulation engine.
-- `REACT_ESR_reproducible.py` — manuscript specification: load-relative Energy System indicators,
-  the relative-weakness diagnostic, all robustness analyses, and the synthetic recovery check.
-- `verify_headline.py` — headline verification at the manuscript settings (about one minute).
-- `requirements.txt` — Python dependencies.
-- `reference/classification_audit.csv` — all 48 state–scenario cases: provisional domain,
-  `P_sel`, median residual, `T`, permutation `p`, BH `q`, identification, and expected rank.
-
-## Installation
+## Install and run
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -r requirements.txt
+bash run_revision.sh results
 ```
 
-## Reproduce the manuscript
+In the manuscript ZIP, these files are under `code/`; invoke
+`bash code/run_revision.sh results` from the package root. In the GitHub repository
+the code is at the repository root. The script resolves its input paths itself.
+It runs the three main scenarios, all appendix and reviewer analyses, 40 full-model
+year-block bootstrap samples, summaries, data checks, and Figures 3–6. It also
+updates numerical LaTeX tables when the manuscript source is present. Runtime
+depends on hardware. Logs are kept beside the outputs. `JOBS=2` reduces concurrent
+bootstrap workers; the default is four. `PYTHON=/path/to/python` selects an interpreter.
 
-```bash
-python REACT_ESR_reproducible.py results --mode all
-```
+Main settings: 2,000 hazard iterations, 10,000 diagnostic profile draws, 5,000
+permutation audit replicates, seed 12345. Robustness classifications use fewer
+permutation replicates because that audit does not enter the classification rule.
+A smoke test (`python REACT_ESR_reproducible.py smoke --fast`) uses smaller
+simulation counts and must not be quoted as manuscript results.
 
-Settings: `M=2000` hazard iterations, `Mw=10000` profile draws, `R=5000` permutation replicates,
-seed `12345`. Runtime is about 15 minutes. `--mode run` produces the main results only;
-`--mode robustness` and `--mode recovery` produce the appendix analyses. `--fast` runs a reduced
-smoke test (M=250, Mw=1000, R=100); its selection frequencies differ slightly from the manuscript.
+## Main input and findings
 
-| Manuscript element | Output file |
-|---|---|
-| Table 4, Fig. 5, Table 6 (regional pattern) | `results/classification_audit.csv` |
-| Fig. 3 (M0, M1, M2) | `results/m0_m1_m2_vulnerability.csv`, `results/figure_data/m012.json` |
-| Fig. 4 (rank acceptability) | `results/figure_data/rank_accept.json` |
-| Table 5 (indicator context) | `results/indicator_ranks.csv`, `results/structural_indicator_panel.csv` |
-| Domain-score correlations | `results/domain_score_correlations.csv`, `results/domain_scores_baseline.csv` |
-| Scenario rank correlations | `results/scenario_rank_correlations.csv` |
-| Copula selection | `results/copula_fit.csv` |
-| Specification sensitivity (Table A.8) | `results/robustness/robustness_specifications.csv` |
-| Threshold sweep (Table A.7) | `results/robustness/robustness_threshold_sweep.csv` |
-| Leave-one-state-out reruns | `results/robustness/robustness_panel_deletion.csv` |
-| Monte Carlo replicas (Table A.4) | `results/robustness/robustness_seed_summary.csv` |
-| Indicator redundancy (Table A.5, VIF) | `results/robustness/robustness_indicator_reduction.csv`, `robustness_vif_*.csv` |
-| Regression leverage | `results/robustness/regression_leverage.csv` |
-| Planted-deviation recovery | `results/robustness/recovery_planted_deviation.csv` |
+`data/mastr_storage/2025-10-01/storage_by_state.csv` is the default input. REACT
+reads `battery_energy_MWh_excluding_duration_flags` as `Storage_MWh` for every
+state and rejects missing states, duplicate states, invalid or negative values.
+The dataset keeps the raw energy column, net and gross power separately, missing
+energy counts, duration flags, and source-member fingerprints. See its README for
+selection, joining, units, and limitations.
 
-## Headline verification
+The screened national 2025 battery stock is 23,871.648430 MWh; raw stock is
+23,982.567730 MWh. The 21 flagged plants are a diagnostic exclusion, not an
+independently verified correction. Registered stock does not establish state of
+charge, dispatchability, household-battery controllability, or firm support.
+
+The manuscript rule is `P_sel >= 0.70 and T > 0`. The default panel identifies:
+
+- Baseline: Bayern and Baden-Württemberg, Climate Exposure.
+- National Pool and Adjacency Flow: Bayern, Baden-Württemberg, Brandenburg,
+  and Sachsen, Climate Exposure.
+
+These are **10 state–scenario cases**. Sachsen is just above the threshold under
+coherent hazards and is sensitive to input and specification changes. Hamburg
+remains below the main threshold. The 2022-only socio-economic subset removes
+Baden-Württemberg's identification; it also removes indicators and changes the
+construct. The results are comparative screening findings, not validated outage
+or operational-resilience predictions.
 
 ```bash
 python verify_headline.py
+python -m unittest discover -s tests -v
 ```
 
-Expected identified relative domain weaknesses:
+The fixed-input diagnostic (M0) identifies five states; within-domain weight
+uncertainty (M1) retains four. M0 still propagates regression prediction error.
+The selected historical hazard copula is Student-t with nu=8.
 
-- **Baseline:** Bayern and Baden-Württemberg — Climate Exposure.
-- **National Pool:** Bayern, Baden-Württemberg, Brandenburg — Climate Exposure; Hamburg — Energy System.
-- **Adjacency Flow:** Bayern, Baden-Württemberg, Brandenburg — Climate Exposure.
+## Output map
 
-The selected compound-hazard family is a **Student-t copula with ν = 8**; Gaussian, Student-t,
-Clayton, and Gumbel candidates are compared by AIC.
+| Content | File under `results/` |
+|---|---|
+| All 48 state–scenario diagnoses | `classification_audit.csv` |
+| Exact input panel after normalization | `structural_indicator_panel.csv` |
+| Input and code fingerprints, settings | `run_manifest.json` |
+| Main expected ranks and rank acceptability | `results_*.csv`, `figure_data/` |
+| M0/M1/M2 and conventional diagnoses | `revision/m012_classification.csv` |
+| Storage panels, including raw and later snapshots | `revision/storage_correction.csv` |
+| All robustness checks summarized | `revision/robustness_matrix.csv` |
+| Full-model 40-sample year-block bootstrap | `revision/bootstrap_full_model.csv` |
+| Copula dependence, trends, held-out-year likelihood | `revision/copula_*.csv`, `revision/hazard_*.csv` |
+| Indicator and construct checks, five seeds, 16 panel deletions | `robustness/` |
+| Numbers for checking manuscript prose | `manuscript_numbers.txt` |
+| Input completeness and plausibility checks | `data_checks.md` |
 
-## Energy System construct
+`reference/classification_audit.csv` records the complete main audit. Figures use
+the same output data, through `finalize_results.py` and `figure_sources/`.
+`update_manuscript_tables.py` updates numerical tables; narrative interpretations
+and dates still require author review when changing model inputs.
 
-Energy System capability is measured relative to the load each state serves:
+## Storage source and sensitivities
 
-- wind, PV, and thermal capacity: MW per MW of average load (`D_annual / 8760`);
-- storage energy capacity: MWh per MW of average load (hours of average demand);
-- grid infrastructure: line-length index per 1000 km² of state area (network density);
-- interstate connectivity `C_i` and the external-support score `S(r_i)`: unchanged.
-
-The support layer multiplies the ratios back by average load, so supply, demand, and interstate
-flows stay in MW. Sensitivity specifications:
+The aggregation script reads the unit, plant, and catalogue XML members of one
+Bundesnetzagentur MaStR ZIP. It joins `SpeMastrNummer` to plant `MaStRNummer`,
+counts usable energy once per eligible plant, converts kW to MW and kWh to MWh,
+and excludes foreign, inactive, nonoperating, and known future units. Missing
+capacities are counted, never estimated. Batteries are separated from pumped
+storage and other technologies. Source URLs, filters, complete XML-member
+SHA-256 fingerprints and ZIP CRCs are in each snapshot's `provenance.json`.
 
 ```bash
-python REACT_ESR_reproducible.py results_absolute --energy-construct absolute
-python REACT_ESR_reproducible.py results_grid_demand --grid-normalisation demand
-python REACT_ESR_reproducible.py results_grid_geomean --grid-normalisation geomean
+python tools/aggregate_mastr_storage.py official_export.zip \
+  --snapshot-date 2025-10-01 \
+  --source-url https://download.marktstammdatenregister.de/Stichtag/Gesamtdatenexport_20251001_25.2.zip \
+  --output-dir data/mastr_storage/2025-10-01
 ```
 
-State areas are from Destatis GENESIS table 33111-0008 (31 December 2023).
+Main data: [MaStR download portal](https://www.marktstammdatenregister.de/MaStR/Datendownload),
+provider Bundesnetzagentur, Datenlizenz Deutschland attribution 2.0.
+This is a derived dataset, not an official state statistical release.
 
-## Diagnostic definition
+The storage sensitivity replaces **all 16 values** with raw 2025 totals, the
+original submitted panel, the historical interim panel, or raw/screened 2026
+totals. The interim HH=145, BE=217, ST=605 MWh values are retained only for this
+comparison. To use another complete dated aggregate, pass it explicitly:
 
-For each Monte Carlo iteration, each domain score is regressed on the other two, and the
-leave-one-state-out residual `e_i / (1 - h_i)` is formed. Across `Mw` profile draws, with the
-associated prediction error added, the residuals are standardised across states within each
-domain. `P_sel` is the share of draws in which a domain is the state's lowest standardised
-residual, and `T` measures its separation from zero and from the other two domains. A relative
-domain weakness is reported when
+```bash
+bash run_revision.sh other_results path/to/main.csv path/to/later.csv
+```
 
-`P_sel >= 0.70` and `T > 0`.
-
-The code also reports a within-state label-permutation check with Benjamini–Hochberg adjustment;
-it is satisfied by all identified cases and does not alter any classification.
-
-Random-number generation is deterministic. Each spatial scenario starts from a scenario-specific
-generator (`seed + 0`, `+101`, `+202`); hazard draws, derating perturbations, and weight draws use
-that stream sequentially, and the diagnostic continues from the captured post-simulation state.
-
-## Figures
-
-`figure_sources/` contains the scripts for the manuscript figures. Figures 3–5 read the JSON
-files written to `results/figure_data/`; copy them to `figure_sources/data/` and run
-`fig_rankings.py` and `fig_relative_weakness_map.py`.
-
-## Data
-
-The state-year hazard panel and the structural state inputs are embedded in `REACT_v4.py`. The
-original public sources are documented in the manuscript: DWD climate records, MaStR, the BNetzA
-power-plant list, OpenStreetMap/TSO grid data, state energy balances, Destatis area statistics,
-and regional statistics.
-
-## Scope
-
-REACT is a regional screening and prioritisation framework. The spatial-support model is a reduced
-adequacy and deliverability representation rather than an AC power-flow model; higher-resolution
-climate-risk, power-system, or socio-economic analysis is intended as a second stage.
-
-## Changes in this version
-
-- Energy System indicators measured relative to regional load (principal specification);
-  absolute capacities and alternative grid normalisations retained as sensitivity options.
-- Released code for all robustness analyses: specification sensitivity, threshold sweep,
-  leave-one-state-out reruns, seed replicas, indicator reduction and VIF, regression leverage,
-  and planted-deviation recovery.
-- Classification rule stated as `P_sel >= 0.70` and `T > 0`; the permutation check is reported.
-- Fixed a missing line break in `REACT_v4.py` that prevented import, and a copula-cache key that
-  ignored the state set in panel-deletion reruns.
-
-## MaStR storage by federal state
-
-A separate registered-stock snapshot is available in [`data/mastr_storage/2026-10-31/`](data/mastr_storage/2026-10-31/).
-It reports battery and all-storage power (MW) and registered usable energy (MWh) for all 16 states,
-with technology detail, missing-data checks, and source-file fingerprints. Reproduce it with
-[`tools/aggregate_mastr_storage.py`](tools/aggregate_mastr_storage.py); see the data-folder README.
-Raw energy totals contain a material registry anomaly; the table includes a separately labelled
-battery-energy screening comparison and an auditable flag file.
-This additional October 2026 snapshot is not automatically substituted into the manuscript's
-embedded structural inputs.
-
+The embedded structural and hazard data are in `REACT_v4.py`; the default battery
+panel overrides its legacy storage values. Energy capability is measured per MW
+of average regional load; battery energy per load is hours of average demand.
+Grid density is per state area. Absolute capacities, alternative grid
+normalisations, and thermal capacity coded as a cost or excluded are reported
+as construct sensitivities. National Pool and Adjacency Flow remain simplified
+support assumptions, not physical dispatch or observed corridor-limit models.

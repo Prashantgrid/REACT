@@ -1,0 +1,17 @@
+state,lowest_domain_score,obstacle_degree_main,obstacle_share,lowest_domain_z,lowest_domain_z_value,M0_residual_lowest,M0_residual_z,M0_provisional,M0_Psel,M0_identified,M1_provisional,M1_Psel,M1_identified,M2_baseline_provisional,M2_baseline_Psel,M2_baseline_identified,M2_national_pool_provisional,M2_national_pool_Psel,M2_national_pool_identified,M2_adjacency_flow_provisional,M2_adjacency_flow_Psel,M2_adjacency_flow_identified
+Hamburg,Energy,Energy,0.649,Energy,-1.35,Energy,-0.43,Energy,0.733,True,Energy,0.68,False,Energy,0.616,False,Energy,0.681,False,Energy,0.659,False
+Bayern,Energy,Energy,0.446,Climate,-1.48,Climate,-1.37,Climate,0.914,True,Climate,0.812,True,Climate,0.736,True,Climate,0.804,True,Climate,0.812,True
+Hessen,Energy,Energy,0.496,Energy,-0.8,Energy,-0.27,Energy,0.521,False,Energy,0.499,False,Energy,0.468,False,Energy,0.486,False,Energy,0.475,False
+Baden-Württemberg,Energy,Energy,0.482,Climate,-1.67,Climate,-1.62,Climate,0.92,True,Climate,0.826,True,Climate,0.717,True,Climate,0.814,True,Climate,0.808,True
+Niedersachsen,Adaptive,Adaptive,0.403,Adaptive,0.06,Adaptive,0.27,Adaptive,0.386,False,Adaptive,0.381,False,Energy,0.338,False,Adaptive,0.37,False,Adaptive,0.366,False
+Bremen,Energy,Energy,0.472,Energy,0.2,Energy,1.0,Energy,0.414,False,Energy,0.401,False,Energy,0.362,False,Energy,0.395,False,Energy,0.4,False
+Nordrhein-Westfalen,Energy,Energy,0.461,Energy,-1.02,Energy,-1.43,Energy,0.561,False,Energy,0.551,False,Energy,0.526,False,Energy,0.546,False,Energy,0.517,False
+Berlin,Energy,Energy,0.479,Energy,-1.16,Energy,-0.65,Energy,0.454,False,Energy,0.419,False,Energy,0.48,False,Energy,0.44,False,Energy,0.473,False
+Schleswig-Holstein,Adaptive,Adaptive,0.486,Adaptive,-0.4,Adaptive,0.12,Adaptive,0.501,False,Adaptive,0.45,False,Adaptive,0.421,False,Adaptive,0.452,False,Adaptive,0.442,False
+Rheinland-Pfalz,Energy,Energy,0.43,Energy,-0.72,Energy,-1.26,Energy,0.516,False,Energy,0.496,False,Energy,0.473,False,Energy,0.495,False,Energy,0.545,False
+Saarland,Adaptive,Adaptive,0.438,Adaptive,-0.58,Adaptive,-0.46,Adaptive,0.452,False,Adaptive,0.448,False,Adaptive,0.436,False,Adaptive,0.46,False,Adaptive,0.456,False
+Thüringen,Adaptive,Adaptive,0.509,Adaptive,-1.2,Adaptive,-1.02,Adaptive,0.591,False,Adaptive,0.586,False,Adaptive,0.536,False,Adaptive,0.572,False,Adaptive,0.57,False
+Brandenburg,Adaptive,Adaptive,0.549,Adaptive,-0.93,Climate,-0.67,Climate,0.917,True,Climate,0.73,True,Climate,0.688,False,Climate,0.73,True,Climate,0.721,True
+Mecklenburg-Vorpommern,Adaptive,Adaptive,0.604,Adaptive,-1.41,Adaptive,-0.58,Adaptive,0.685,False,Adaptive,0.68,False,Adaptive,0.618,False,Adaptive,0.677,False,Adaptive,0.668,False
+Sachsen,Adaptive,Adaptive,0.43,Climate,-1.3,Climate,-1.23,Climate,0.835,True,Climate,0.716,True,Climate,0.572,False,Climate,0.706,True,Climate,0.719,True
+Sachsen-Anhalt,Adaptive,Adaptive,0.459,Adaptive,-1.55,Adaptive,-2.11,Adaptive,0.47,False,Adaptive,0.456,False,Adaptive,0.503,False,Adaptive,0.458,False,Adaptive,0.453,False

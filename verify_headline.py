@@ -4,16 +4,17 @@
 Runs the three scenarios at the manuscript settings (M=2000, Mw=10000, seed 12345)
 with a reduced permutation count. Identification depends only on P_sel and T, which
 do not depend on the number of permutation replicates, so the identified cases are
-exactly those reported in the manuscript (Table 4). Runtime: about one minute.
+exactly those reported in the manuscript (Table 4). Uses the complete screened
+1 October 2025 archived MaStR battery panel, the default manuscript input.
 """
 import REACT_ESR_reproducible as react
 
 EXPECTED = {
     "baseline": {("Bayern", "Climate"), ("Baden-Württemberg", "Climate")},
     "national_pool": {("Bayern", "Climate"), ("Baden-Württemberg", "Climate"),
-                      ("Brandenburg", "Climate"), ("Hamburg", "Energy")},
+                      ("Brandenburg", "Climate"), ("Sachsen", "Climate")},
     "adjacency_flow": {("Bayern", "Climate"), ("Baden-Württemberg", "Climate"),
-                       ("Brandenburg", "Climate")},
+                       ("Brandenburg", "Climate"), ("Sachsen", "Climate")},
 }
 
 

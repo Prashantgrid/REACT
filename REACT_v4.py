@@ -695,6 +695,17 @@ XI_CRIT         = 0.883  # pooled 99th percentile of the STATE-RELATIVE Xi* pane
                          # convention for extreme indices; Zhang et al. 2011).
                          # Observed exceedances: 6 of 560 state-years (~1%).
 FLOW_SCALE      = 0.25
+# Support-layer penalty parameters (Appendix A.2.3); exposed as module-level
+# settings so that the revision sensitivity analyses can vary them.
+NP_PENALTY_CAP     = 0.50   # National Pool cap on the import penalty
+AF_PENALTY_ACCESS  = 0.70   # Adjacency Flow penalty on C_i and S(r_i)
+AF_PENALTY_GRID    = 0.30   # Adjacency Flow secondary penalty on W_LINES
+# Optional revision hooks (all None in the manuscript specification):
+HAZARD_RANGES      = None   # dict hazard -> (lo, hi): fixed pooled ranges for derating
+FLOW_CAPACITY      = None   # (N x N) corridor capacities in MW replacing Eq. (A.9)
+STRUCTURAL_SAMPLER = None   # callable(rng) -> dict of support parameters per iteration
+RECORD_SUPPORT     = None   # list: if set, per-iteration support diagnostics are appended
+FLOW_ALLOCATION    = "maxflow"  # "maxflow" (manuscript) | "fair" (max-min fair shortfall sharing)
 REGRESSION_NOISE_SCALE = 1.0
 
 # Screening-level dependable-capacity credits used only in the two spatial
@@ -958,13 +969,16 @@ def adjacency_matrix(states):
             if s in idx and n in idx: A[idx[s],idx[n]]=A[idx[n],idx[s]]=1
     return A
 
-def dependable_supply(Y,col_to_idx):
+def dependable_supply(Y,col_to_idx,sp=None):
     # CONS_VEC restores MW under the demand-relative construct (ones otherwise),
     # so deficit/flow physics are construct-invariant.
-    return CONS_VEC*(CAPACITY_CREDIT["Wind"]*Y[:,col_to_idx["Wind_MW"]]
-            +CAPACITY_CREDIT["Solar"]*Y[:,col_to_idx["Solar_MW"]]
-            +CAPACITY_CREDIT["Thermal"]*Y[:,col_to_idx["Thermal_MW"]]
-            +Y[:,col_to_idx["Storage_MWh"]]/H_DIS)
+    sp=sp or {}
+    cw=sp.get("c_w",CAPACITY_CREDIT["Wind"]); cpv=sp.get("c_pv",CAPACITY_CREDIT["Solar"])
+    cth=sp.get("c_th",CAPACITY_CREDIT["Thermal"]); hdis=sp.get("h_dis",H_DIS)
+    return CONS_VEC*(cw*Y[:,col_to_idx["Wind_MW"]]
+            +cpv*Y[:,col_to_idx["Solar_MW"]]
+            +cth*Y[:,col_to_idx["Thermal_MW"]]
+            +Y[:,col_to_idx["Storage_MWh"]]/hdis)
 
 def baseline_demand(static,baseline_arr,col_to_idx):
     S0=dependable_supply(baseline_arr,col_to_idx)
@@ -972,7 +986,46 @@ def baseline_demand(static,baseline_arr,col_to_idx):
     shares=shares/shares.sum()
     return S0.sum()*shares
 
-def adjacency_residual_shortfall(S,D,C_vec):
+def _corridor_caps(D,C_vec,phi):
+    A=adjacency_matrix(STATE_ORDER); N=len(D); caps={}
+    for i in range(N):
+        for j in range(i+1,N):
+            if A[i,j]==0: continue
+            if FLOW_CAPACITY is not None:
+                caps[(i,j)]=float(FLOW_CAPACITY[i,j])
+            else:
+                caps[(i,j)]=float(phi*0.5*(D[i]+D[j])*np.sqrt(max(C_vec[i]*C_vec[j],1e-6)))
+    return caps
+
+def _fair_residual_shortfall(S,D,C_vec,phi):
+    """Max-min fair sharing: maximise the common covered share t of every deficit,
+    then maximise total delivery at that t (two linear programmes)."""
+    from scipy.optimize import linprog
+    N=len(S); deficit=np.maximum(0,D-S); surplus=np.maximum(0,S-D)
+    if deficit.sum()<=1e-9: return np.zeros(N)
+    caps=_corridor_caps(D,C_vec,phi); edges=[]
+    for (i,j),c in caps.items(): edges += [(i,j,c),(j,i,c)]
+    E=len(edges); nv=E+2*N+1   # flows, supply_i, delivered_i, t
+    Aeq=np.zeros((N,nv)); beq=np.zeros(N)
+    for e,(i,j,_) in enumerate(edges): Aeq[i,e]-=1; Aeq[j,e]+=1
+    for i in range(N): Aeq[i,E+i]=1; Aeq[i,E+N+i]=-1
+    bounds=[(0,c) for _,_,c in edges]+[(0,surplus[i]) for i in range(N)]+[(0,deficit[i]) for i in range(N)]+[(0,1)]
+    Aub=np.zeros((N,nv)); bub=np.zeros(N)
+    for i in range(N): Aub[i,E+N+i]=-1; Aub[i,-1]=deficit[i]   # t*deficit_i <= delivered_i
+    c1=np.zeros(nv); c1[-1]=-1
+    r1=linprog(c1,A_ub=Aub,b_ub=bub,A_eq=Aeq,b_eq=beq,bounds=bounds,method="highs")
+    if not r1.success: return adjacency_residual_shortfall(S,D,C_vec,phi,allocation="maxflow")
+    t=r1.x[-1]; bounds[-1]=(max(t-1e-9,0),1)
+    c2=np.zeros(nv); c2[E+N:E+2*N]=-1
+    r2=linprog(c2,A_ub=Aub,b_ub=bub,A_eq=Aeq,b_eq=beq,bounds=bounds,method="highs")
+    x=r2.x if r2.success else r1.x
+    delivered=x[E+N:E+2*N]
+    return np.maximum(0,deficit-delivered)/(deficit+1e-9)
+
+def adjacency_residual_shortfall(S,D,C_vec,phi=None,allocation=None):
+    phi=FLOW_SCALE if phi is None else phi
+    if (allocation or FLOW_ALLOCATION)=="fair":
+        return _fair_residual_shortfall(S,D,C_vec,phi)
     import networkx as nx
     N=len(S); deficit=np.maximum(0,D-S); surplus=np.maximum(0,S-D)
     G=nx.DiGraph(); src="SRC"; sink="SNK"
@@ -983,7 +1036,10 @@ def adjacency_residual_shortfall(S,D,C_vec):
     for i in range(N):
         for j in range(i+1,N):
             if A[i,j]==0: continue
-            cap=FLOW_SCALE*0.5*(D[i]+D[j])*np.sqrt(max(C_vec[i]*C_vec[j],1e-6))
+            if FLOW_CAPACITY is not None:
+                cap=float(FLOW_CAPACITY[i,j])
+            else:
+                cap=phi*0.5*(D[i]+D[j])*np.sqrt(max(C_vec[i]*C_vec[j],1e-6))
             G.add_edge(i,j,capacity=float(cap)); G.add_edge(j,i,capacity=float(cap))
     try:
         _,flow=nx.maximum_flow(G,src,sink,flow_func=nx.algorithms.flow.preflow_push)
@@ -1034,11 +1090,15 @@ def run_scenario(static,hazard,scenario,verbose=True):
     if verbose:
         print(f"\n=== {scenario}: {fit['model']} copula, df={fit['df']}, n={fit['n_complete']} ===")
     hr={c:(float(hazard[c].min()),float(hazard[c].max())) for c in hcols}
+    if HAZARD_RANGES is not None:
+        hr.update(HAZARD_RANGES)
+    struct_rng=np.random.default_rng(RNG_SEED+999) if STRUCTURAL_SAMPLER is not None else None
     panel=build_baseline_panel(static,hazard)
     cols=[n for n,_,_ in INDICATOR_SYSTEM]; col_to_idx={c:i for i,c in enumerate(cols)}
     is_cost=np.array([IS_COST[c] for c in cols]); baseline_arr=panel[cols].to_numpy(float)
     block_idx={b:np.array([col_to_idx[c] for c in BLOCK_INDICATORS[b]]) for b in BLOCK_INDICATORS}
     D=baseline_demand(static,baseline_arr,col_to_idx)
+    d_shares=D/D.sum()
     r_import=static.loc[STATE_ORDER,"r_import"].to_numpy(float)
     C_base=baseline_arr[:,col_to_idx["C_i"]]
     rng=np.random.default_rng(RNG_SEED + {"baseline":0,"national_pool":101,"adjacency_flow":202}[scenario])
@@ -1087,19 +1147,31 @@ def run_scenario(static,hazard,scenario,verbose=True):
                        ("P30_Days","p30_days_mean"),("Rx1day","Rx1day_mm_mean"),
                        ("Storm_Days","Storm_Days_mean"),("Low_Wind","low_wind_days_mean")]:
             Y[:,col_to_idx[name]]=hzv[c]
+        sp=STRUCTURAL_SAMPLER(struct_rng) if STRUCTURAL_SAMPLER is not None else {}
+        np_cap=sp.get("np_cap",NP_PENALTY_CAP); af_acc=sp.get("af_access",AF_PENALTY_ACCESS)
+        af_grid=sp.get("af_grid",AF_PENALTY_GRID)
+        # with sampled credits, demand is re-balanced so that baseline national
+        # dependable supply equals national demand (as in baseline_demand)
+        Dm=D if not sp else dependable_supply(baseline_arr,col_to_idx,sp).sum()*d_shares
         if scenario=="national_pool":
-            S=dependable_supply(Y,col_to_idx)
-            scarcity=max(0.0,float((D.sum()-S.sum())/(D.sum()+1e-9)))
+            S=dependable_supply(Y,col_to_idx,sp)
+            scarcity=max(0.0,float((Dm.sum()-S.sum())/(Dm.sum()+1e-9)))
             import_int=np.clip(r_import,0,1)
-            pen=np.clip(scarcity*import_int*(1-C_base),0,0.50)
+            pen=np.clip(scarcity*import_int*(1-C_base),0,np_cap)
             Y[:,col_to_idx["R_ri"]]*=(1-pen)
             Y[:,col_to_idx["C_i"]]*=(1-pen)
+            if RECORD_SUPPORT is not None:
+                RECORD_SUPPORT.append(dict(scenario=scenario,scarcity=scarcity,pen=pen.copy(),
+                                           S=S.copy(),D=Dm.copy()))
         elif scenario=="adjacency_flow":
-            S=dependable_supply(Y,col_to_idx)
-            theta=adjacency_residual_shortfall(S,D,C_base)
-            Y[:,col_to_idx["C_i"]]*=(1-0.70*theta)
-            Y[:,col_to_idx["R_ri"]]*=(1-0.70*theta)
-            Y[:,col_to_idx["WLINES"]]*=(1-0.30*theta*(1-C_base))
+            S=dependable_supply(Y,col_to_idx,sp)
+            theta=adjacency_residual_shortfall(S,Dm,C_base,sp.get("phi",FLOW_SCALE))
+            Y[:,col_to_idx["C_i"]]*=(1-af_acc*theta)
+            Y[:,col_to_idx["R_ri"]]*=(1-af_acc*theta)
+            Y[:,col_to_idx["WLINES"]]*=(1-af_grid*theta*(1-C_base))
+            if RECORD_SUPPORT is not None:
+                RECORD_SUPPORT.append(dict(scenario=scenario,theta=theta.copy(),
+                                           S=S.copy(),D=Dm.copy()))
         Yn=normalised_indicators(Y,is_cost); yn_sum+=Yn
         wb=sample_dirichlet_floor([DIRICHLET_ALPHA]*3,rng); w=np.zeros(J)
         for bi,b in enumerate(("Climate","Energy","Adaptive")):

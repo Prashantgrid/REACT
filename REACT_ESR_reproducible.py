@@ -252,7 +252,7 @@ def _permutation_pvalues(z_store, observed_T, rng, n_perm=None, chunk=50):
 
 
 def diagnose_blocks(block_iter, rng, n_perm=None):
-    """Uncertainty-propagated, permutation-calibrated domain-profile screen."""
+    """Uncertainty-propagated domain-profile screen; permutation values are an audit only."""
     M, N, K = block_iter.shape
     R_cache = np.empty_like(block_iter, dtype=float)
     SE_cache = np.empty_like(block_iter, dtype=float)
@@ -331,10 +331,56 @@ def build_panel(static, hazard):
     return p.astype(float)
 
 
+# Historical interim battery-storage energy capacity (MWh) for the three states whose MaStR extraction
+# returned zero in the submitted panel (a filtering artefact: MaStR registers home and
+# large-scale batteries in every state). Replacement values:
+#   Sachsen-Anhalt 605 MWh  - MaStR query of 14 July 2025 (home 377, commercial 18,
+#                             large-scale 210 MWh), Ministry for Science, Energy, Climate
+#                             Protection and Environment Sachsen-Anhalt, press release 91/2025.
+#   Berlin         217 MWh  - Senate Department for Economics, Energy and Public Enterprises,
+#                             Masterplan Solarcity monitoring report 2025 (MaStR-based).
+#   Hamburg        145 MWh  - linear interpolation to end-2025 between 24 MWh (2022) and
+#                             177 MWh (September 2026) reported by the Hamburg Senate.
+# These values are retained ONLY for the historical-input sensitivity. The default
+# replaces all 16 states with the archived 1 October 2025 MaStR aggregate below.
+STORAGE_CORRECTIONS = {"Sachsen-Anhalt": 605.0, "Berlin": 217.0, "Hamburg": 145.0}
+DEFAULT_STORAGE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                    "data", "mastr_storage", "2025-10-01", "storage_by_state.csv")
+STORAGE_DATA = "registry"       # registry baseline; corrected retained only for legacy comparison
+# Optional: a 16-state MaStR aggregate (data/mastr_storage/<date>/storage_by_state.csv) that
+# replaces Storage_MWh for all states. Battery energy excluding duration-flagged plants is used.
+STORAGE_FILE = None
+STORAGE_COLUMN = "battery_energy_MWh_excluding_duration_flags"
+
+
+def load_storage_file(path, column=None):
+    df = pd.read_csv(path)
+    col = column or STORAGE_COLUMN
+    required = {"state", col}
+    if not required.issubset(df.columns):
+        raise ValueError(f"storage file lacks columns: {sorted(required-set(df.columns))}")
+    if df.state.duplicated().any():
+        raise ValueError("storage file contains duplicate state rows")
+    out = df.set_index("state")[col].astype(float)
+    missing = set(core.STATE_ORDER) - set(out.index)
+    if missing:
+        raise ValueError(f"storage file lacks states: {sorted(missing)}")
+    if len(out) != 16 or not np.isfinite(out.to_numpy()).all() or (out < 0).any():
+        raise ValueError("storage file must contain exactly 16 finite, nonnegative state values")
+    return out
+
+
 def _configured_static():
     static = core.load_static_panel().loc[core.STATE_ORDER].copy()
     # Table H.10 value used in the ESR manuscript.
     static.loc["Hamburg", "Solar_PV_MW"] = 250.0
+    if STORAGE_FILE is not None or STORAGE_DATA == "registry":
+        vals = load_storage_file(STORAGE_FILE or DEFAULT_STORAGE_FILE)
+        for s in core.STATE_ORDER:
+            static.loc[s, "Storage_MWh"] = float(vals[s])
+    elif STORAGE_DATA == "corrected":
+        for s, v in STORAGE_CORRECTIONS.items():
+            static.loc[s, "Storage_MWh"] = v
     return static
 
 
@@ -816,6 +862,7 @@ def run_recovery(out_dir, deltas=(0.10, 0.20, 0.40, 0.80, 1.20), n_panels=200, n
 
 def main():
     global N_MONTE_CARLO, N_DIAGNOSTIC, N_PERMUTATION, RNG_SEED, RESIDUAL_MODE, ENERGY_CONSTRUCT, GRID_NORMALISATION
+    global STORAGE_DATA, STORAGE_FILE
     p = argparse.ArgumentParser(description="REACT ESR reproducibility pipeline")
     p.add_argument("output_dir", nargs="?", default="REACT_ESR_outputs")
     p.add_argument("--mode", choices=("run", "robustness", "recovery", "all"), default="run")
@@ -827,6 +874,10 @@ def main():
     p.add_argument("--energy-construct", choices=("load_relative", "absolute"), default="load_relative")
     p.add_argument("--grid-normalisation", choices=("area", "demand", "geomean"), default="area")
     p.add_argument("--residual-mode", choices=("press", "legacy"), default="press")
+    p.add_argument("--storage-data", choices=("registry", "corrected", "submitted"), default="registry",
+                   help="registry = dated 16-state baseline; corrected = historical interim values; submitted = original panel")
+    p.add_argument("--storage-file", default=None,
+                   help="16-state MaStR storage CSV (state, battery_energy_MWh_excluding_duration_flags)")
     args = p.parse_args()
     if args.fast:
         N_MONTE_CARLO, N_DIAGNOSTIC, N_PERMUTATION = 250, 1000, 100
@@ -840,6 +891,8 @@ def main():
     RESIDUAL_MODE = args.residual_mode
     ENERGY_CONSTRUCT = args.energy_construct
     GRID_NORMALISATION = args.grid_normalisation
+    STORAGE_DATA = args.storage_data
+    STORAGE_FILE = args.storage_file
     main_results = None
     if args.mode in ("run", "all"):
         main_results = run_all(args.output_dir)

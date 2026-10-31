@@ -1,0 +1,56 @@
+{
+  "main_storage": {
+    "name": "storage_by_state.csv",
+    "sha256": "f06f551db70be5fa515439c66d55a78e87972ead5c369016c5999e09bf7bbb96"
+  },
+  "later_snapshot": {
+    "name": "storage_by_state.csv",
+    "sha256": "42228788db4d1708bf283a731795251daf33a755da3d19cefea03af9e4c23001"
+  },
+  "main_snapshot_date": "2025-10-01",
+  "sensitivity_snapshot_date": "2026-10-31",
+  "storage_column": "battery_energy_MWh_excluding_duration_flags",
+  "hazard_iterations": 2000,
+  "profile_draws": 10000,
+  "permutation_replicates": 5000,
+  "seed": 12345,
+  "full_model_bootstrap_samples": 40,
+  "source_files": [
+    {
+      "name": "REACT_ESR_reproducible.py",
+      "sha256": "69f2b133153baefc6699f8ca6fc40d5ea1f7bdc0598e587b328268adc5c372bf"
+    },
+    {
+      "name": "REACT_data_checks.py",
+      "sha256": "45b55946e80f897030c8cb5b3380e0d8035aa81aa40e5c479eed1d90fa27739d"
+    },
+    {
+      "name": "REACT_manuscript_numbers.py",
+      "sha256": "7f45066c9cb0a5e402cc7d651010bbadc115f32527f9bc9745e0feff7c3897f4"
+    },
+    {
+      "name": "REACT_revision.py",
+      "sha256": "a403622a26b720c133b72f4216b6df4839c7794faa765471a211fd887e555538"
+    },
+    {
+      "name": "REACT_revision_summary.py",
+      "sha256": "70eccf8ada2c7f93441858623d45561d16fb8c73a7e254428f62d4ba7921f10e"
+    },
+    {
+      "name": "REACT_v4.py",
+      "sha256": "115af0a878d92be34cec592277b9f97202f68e07c5a6f9714f130c72a67571f8"
+    },
+    {
+      "name": "finalize_results.py",
+      "sha256": "0a74c3fc4854f1109a5dc3954f6e215975713de10a3d5eef1d3d63024dd8ea04"
+    },
+    {
+      "name": "update_manuscript_tables.py",
+      "sha256": "e38485005470c9f598d1dbe034e1ab8b0ae1cacaf6a7aea2503f951c493031d6"
+    },
+    {
+      "name": "verify_headline.py",
+      "sha256": "e9936a02e3e3e72a146a3f3d79d813c44240f280a7ffeea0a2348e5acd492823"
+    }
+  ]
+}

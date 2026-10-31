@@ -1,3 +1,11 @@
+# 31 October 2026: complete archived battery panel for the ESR revision
+
+- Replace all 16 battery-energy inputs with the archived MaStR export of 1 October 2025.
+- Preserve raw/screened totals, missing-data counts, duration flags, source-member fingerprints, and the later 2026 sensitivity.
+- Add the full reviewer-analysis scripts, figures, data checks, numerical-table updater, run manifest, and fresh results.
+- Main classifications are 2/4/4 across Baseline/National Pool/Adjacency Flow. Sachsen is identified near the threshold under coherent hazards; its sensitivity is reported explicitly.
+- Original and interim storage panels remain sensitivities only. Registered stock does not establish operational availability or outage resilience.
+
 # REACT ESR package — changes in this version
 
 ## Specification decision
