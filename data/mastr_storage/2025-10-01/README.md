@@ -116,7 +116,7 @@ repository root:
 
 ```bash
 pip install -r requirements-storage.txt
-python tools/aggregate_mastr_storage.py /path/to/Gesamtdatenexport_20261031_26.2.zip \
+python tools/aggregate_mastr_storage.py /path/to/Gesamtdatenexport_20251001_25.2.zip \
   --snapshot-date 2025-10-01 \
   --source-url https://download.marktstammdatenregister.de/Stichtag/Gesamtdatenexport_20251001_25.2.zip \
   --output-dir data/mastr_storage/2025-10-01
