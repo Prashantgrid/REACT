@@ -1,0 +1,979 @@
+{
+  "source": "Bundesnetzagentur, Marktstammdatenregister (MaStR), public Gesamtdatenexport",
+  "snapshot_date": "2026-10-31",
+  "source_url": "https://download.marktstammdatenregister.de/Gesamtdatenexport_20261031_26.2.zip",
+  "portal_url": "https://www.marktstammdatenregister.de/MaStR/Datendownload",
+  "license": "Datenlizenz Deutschland - Namensnennung - Version 2.0",
+  "license_url": "https://www.govdata.de/dl-de/by-2-0",
+  "filters": {
+    "Land": {
+      "84": "Deutschland"
+    },
+    "EinheitSystemstatus": {
+      "472": "Aktiviert"
+    },
+    "EinheitBetriebsstatus": {
+      "35": "In Betrieb"
+    },
+    "AnlageBetriebsstatus_for_energy": {
+      "35": "In Betrieb"
+    },
+    "future_commissioning_dates_excluded": true
+  },
+  "field_units": {
+    "Nettonennleistung": "kW",
+    "Bruttoleistung": "kW",
+    "NutzbareSpeicherkapazitaet": "kWh"
+  },
+  "energy_join": "units.SpeMastrNummer = plants.MaStRNummer; usable energy counted once per plant",
+  "missing_values": "Missing/negative/non-finite capacities are not imputed; reported energy is the sum of available nonnegative registered values. Consult coverage counts.",
+  "allocation": "Energy of plants with multiple eligible states or technologies is unallocated. Units without a valid German state are excluded from state tables and recorded in quality_checks.csv.",
+  "geography": "Physical location in the 16 German states; foreign-located plants and offshore economic zones are excluded.",
+  "interpretation": "Registered operating stock at the snapshot, not dispatchable power, available energy, reserve eligibility, or a historical reconstruction.",
+  "state_mapping": {
+    "1400": {
+      "name": "Brandenburg",
+      "iso": "DE-BB"
+    },
+    "1401": {
+      "name": "Berlin",
+      "iso": "DE-BE"
+    },
+    "1402": {
+      "name": "Baden-Württemberg",
+      "iso": "DE-BW"
+    },
+    "1403": {
+      "name": "Bayern",
+      "iso": "DE-BY"
+    },
+    "1404": {
+      "name": "Bremen",
+      "iso": "DE-HB"
+    },
+    "1405": {
+      "name": "Hessen",
+      "iso": "DE-HE"
+    },
+    "1406": {
+      "name": "Hamburg",
+      "iso": "DE-HH"
+    },
+    "1407": {
+      "name": "Mecklenburg-Vorpommern",
+      "iso": "DE-MV"
+    },
+    "1408": {
+      "name": "Niedersachsen",
+      "iso": "DE-NI"
+    },
+    "1409": {
+      "name": "Nordrhein-Westfalen",
+      "iso": "DE-NW"
+    },
+    "1410": {
+      "name": "Rheinland-Pfalz",
+      "iso": "DE-RP"
+    },
+    "1411": {
+      "name": "Schleswig-Holstein",
+      "iso": "DE-SH"
+    },
+    "1412": {
+      "name": "Saarland",
+      "iso": "DE-SL"
+    },
+    "1413": {
+      "name": "Sachsen",
+      "iso": "DE-SN"
+    },
+    "1414": {
+      "name": "Sachsen-Anhalt",
+      "iso": "DE-ST"
+    },
+    "1415": {
+      "name": "Thüringen",
+      "iso": "DE-TH"
+    }
+  },
+  "technology_mapping": {
+    "524": "Batterie",
+    "525": "Druckluft",
+    "526": "Schwungrad",
+    "1537": "Pumpspeicher",
+    "3067": "Wasserstoffspeicher"
+  },
+  "battery_duration_screen": {
+    "threshold_hours": 8760.0,
+    "definition": "registered usable plant energy divided by summed eligible net unit power",
+    "meaning": "Diagnostic flag, not a verified correction. Raw energy totals are retained. The separate screened battery-energy column excludes flagged energy without substituting a value. An anomaly may arise in either energy or power.",
+    "flagged_plants": [
+      {
+        "plant_mastr_number": "SSE913520479976",
+        "state_iso": "DE-NW",
+        "state": "Nordrhein-Westfalen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 30042.026,
+        "linked_net_power_MW": 0.02,
+        "energy_to_power_hours": 1502101.3,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE901986562929",
+        "state_iso": "DE-HE",
+        "state": "Hessen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 27.5,
+        "linked_net_power_MW": 0.001,
+        "energy_to_power_hours": 27500.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE925914229029",
+        "state_iso": "DE-RP",
+        "state": "Rheinland-Pfalz",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 8.1,
+        "linked_net_power_MW": 0.0008,
+        "energy_to_power_hours": 10125.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE925598120995",
+        "state_iso": "DE-RP",
+        "state": "Rheinland-Pfalz",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 8.0,
+        "linked_net_power_MW": 0.0008,
+        "energy_to_power_hours": 10000.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE965648385752",
+        "state_iso": "DE-RP",
+        "state": "Rheinland-Pfalz",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 2.688,
+        "linked_net_power_MW": 3e-06,
+        "energy_to_power_hours": 896000.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE980274559506",
+        "state_iso": "DE-NI",
+        "state": "Niedersachsen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.215,
+        "linked_net_power_MW": 1e-05,
+        "energy_to_power_hours": 21500.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE951585051935",
+        "state_iso": "DE-NI",
+        "state": "Niedersachsen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.03,
+        "linked_net_power_MW": 3e-06,
+        "energy_to_power_hours": 10000.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE969363195573",
+        "state_iso": "DE-HE",
+        "state": "Hessen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.01932,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 19320.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE989757841329",
+        "state_iso": "DE-RP",
+        "state": "Rheinland-Pfalz",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.01536,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 15360.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE923926619982",
+        "state_iso": "DE-BW",
+        "state": "Baden-Württemberg",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.015,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 15000.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE941143667548",
+        "state_iso": "DE-BW",
+        "state": "Baden-Württemberg",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.015,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 15000.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE963027586202",
+        "state_iso": "DE-RP",
+        "state": "Rheinland-Pfalz",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.015,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 15000.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE927763853646",
+        "state_iso": "DE-HE",
+        "state": "Hessen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.0138,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 13800.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE992533214170",
+        "state_iso": "DE-BW",
+        "state": "Baden-Württemberg",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.0135,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 13500.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE959477239409",
+        "state_iso": "DE-BW",
+        "state": "Baden-Württemberg",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.0128,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 12800.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE964261208790",
+        "state_iso": "DE-HE",
+        "state": "Hessen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.0128,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 12800.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE994745862439",
+        "state_iso": "DE-HE",
+        "state": "Hessen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.011,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 11000.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE977001594053",
+        "state_iso": "DE-HE",
+        "state": "Hessen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.0108,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10800.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE996651928384",
+        "state_iso": "DE-NI",
+        "state": "Niedersachsen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.0107,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10700.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE905454184736",
+        "state_iso": "DE-RP",
+        "state": "Rheinland-Pfalz",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.01036,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10360.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE983220977898",
+        "state_iso": "DE-BW",
+        "state": "Baden-Württemberg",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.01024,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10240.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE984025581273",
+        "state_iso": "DE-HE",
+        "state": "Hessen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.01024,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10240.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE985315812343",
+        "state_iso": "DE-RP",
+        "state": "Rheinland-Pfalz",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.01024,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10240.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE992826534909",
+        "state_iso": "DE-RP",
+        "state": "Rheinland-Pfalz",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.01024,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10240.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE982286481578",
+        "state_iso": "DE-HE",
+        "state": "Hessen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.0102,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10200.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE993080277120",
+        "state_iso": "DE-NI",
+        "state": "Niedersachsen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.010024,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10024.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE923405473845",
+        "state_iso": "DE-BW",
+        "state": "Baden-Württemberg",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.01,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10000.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE933625827885",
+        "state_iso": "DE-BW",
+        "state": "Baden-Württemberg",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.01,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10000.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE947354268918",
+        "state_iso": "DE-HE",
+        "state": "Hessen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.01,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10000.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE960500759399",
+        "state_iso": "DE-HE",
+        "state": "Hessen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.01,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10000.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE966766187983",
+        "state_iso": "DE-HE",
+        "state": "Hessen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.01,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 10000.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE992855088503",
+        "state_iso": "DE-RP",
+        "state": "Rheinland-Pfalz",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.00984,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 9840.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE974292163807",
+        "state_iso": "DE-HE",
+        "state": "Hessen",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.0095,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 9500.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      },
+      {
+        "plant_mastr_number": "SSE942381437566",
+        "state_iso": "DE-RP",
+        "state": "Rheinland-Pfalz",
+        "technology": "Batterie",
+        "registered_usable_energy_MWh": 0.00918,
+        "linked_net_power_MW": 1e-06,
+        "energy_to_power_hours": 9180.0,
+        "flag": "battery_duration_exceeds_8760_hours"
+      }
+    ]
+  },
+  "quality_checks": {
+    "unit_records_seen": 2909826,
+    "eligible_units": 2862885,
+    "units_missing_or_invalid_net_power": 1,
+    "units_missing_or_invalid_gross_power": 0,
+    "units_without_plant_link": 11,
+    "units_without_commissioning_date": 0,
+    "units_excluded_operating_status": 46905,
+    "units_excluded_country": 36,
+    "plant_records_seen": 2909745,
+    "operating_foreign_plant_links_seen": 18,
+    "linked_plants_spanning_states": 0,
+    "linked_plants_spanning_technologies": 0,
+    "linked_plants_absent_from_plant_table": 0,
+    "linked_plants_not_operating": 0,
+    "unallocated_known_energy_kwh": 0,
+    "battery_plants_flagged_extreme_duration": 34,
+    "battery_energy_kwh_flagged_extreme_duration": 30088874.144
+  },
+  "totals_16_states": {
+    "battery_operating_units": 2862287,
+    "battery_net_power_MW": 20977.958062,
+    "battery_gross_power_MW": 22207.735122,
+    "battery_registered_usable_energy_MWh": 64952.605506,
+    "battery_energy_MWh_excluding_duration_flags": 34863.731362,
+    "battery_plants_flagged_extreme_duration": 34,
+    "battery_plants_with_usable_energy": 2862230,
+    "battery_plants_missing_usable_energy": 46,
+    "battery_units_missing_net_power": 0,
+    "battery_units_with_missing_or_unallocated_plant_energy": 56,
+    "all_storage_operating_units": 2862885,
+    "all_storage_net_power_MW": 27227.085558,
+    "all_storage_gross_power_MW": 28500.974873,
+    "all_storage_registered_usable_energy_MWh": 202804.089819,
+    "all_storage_plants_with_usable_energy": 2862753,
+    "all_storage_plants_missing_usable_energy": 70,
+    "all_storage_units_missing_net_power": 1,
+    "all_storage_units_with_missing_or_unallocated_plant_energy": 81
+  },
+  "source_members": [
+    {
+      "name": "Katalogwerte.xml",
+      "uncompressed_sha256": "1f8a2e540bd6d8577dd81e9e42bd2f996fdada72d11fa18db2a5b691f212bc0f",
+      "crc32": "8297a1ab"
+    },
+    {
+      "name": "EinheitenStromSpeicher_1.xml",
+      "records": 100000,
+      "uncompressed_bytes": 319671308,
+      "compressed_bytes": 16414850,
+      "crc32": "7da85bb6",
+      "uncompressed_sha256": "7530d1647f8995e7ec15e927abe406a95f6d4b78ef713301702b81bf0861c7ab"
+    },
+    {
+      "name": "EinheitenStromSpeicher_2.xml",
+      "records": 100000,
+      "uncompressed_bytes": 319683964,
+      "compressed_bytes": 16439576,
+      "crc32": "b725a331",
+      "uncompressed_sha256": "f1f8c06836c10e830d2ba54c3c998c10dcfc4b9d81ac7a062edea2d9c7648239"
+    },
+    {
+      "name": "EinheitenStromSpeicher_3.xml",
+      "records": 100000,
+      "uncompressed_bytes": 319588840,
+      "compressed_bytes": 16202621,
+      "crc32": "b1ba61b8",
+      "uncompressed_sha256": "2bc2d686ab0c2a059aa9eedf891f89bd9fe185409ea166b3eaab57f5345c1f4d"
+    },
+    {
+      "name": "EinheitenStromSpeicher_4.xml",
+      "records": 100000,
+      "uncompressed_bytes": 319228336,
+      "compressed_bytes": 16205058,
+      "crc32": "a3abb1fb",
+      "uncompressed_sha256": "24642758c53e5766c4f95425e77ef0b44f2c22601cb1ceaaa3251205ee2cfb8a"
+    },
+    {
+      "name": "EinheitenStromSpeicher_5.xml",
+      "records": 100000,
+      "uncompressed_bytes": 318647210,
+      "compressed_bytes": 16201624,
+      "crc32": "3b028c13",
+      "uncompressed_sha256": "9516ccc08dd0938d4569b5ed007389a9949f622c4bab1f324221ad5890a30110"
+    },
+    {
+      "name": "EinheitenStromSpeicher_6.xml",
+      "records": 100000,
+      "uncompressed_bytes": 314506926,
+      "compressed_bytes": 15751189,
+      "crc32": "130b3709",
+      "uncompressed_sha256": "5165c6d02e817fe25ba3dee4fa0d6f110a517f83a469ab434f4f66d56abac64e"
+    },
+    {
+      "name": "EinheitenStromSpeicher_7.xml",
+      "records": 100000,
+      "uncompressed_bytes": 310567306,
+      "compressed_bytes": 15231728,
+      "crc32": "cec2c746",
+      "uncompressed_sha256": "2c06042e2ad35358b4a194cfefff29d2b6f766590a83a4ae8f6725b49d199c82"
+    },
+    {
+      "name": "EinheitenStromSpeicher_8.xml",
+      "records": 100000,
+      "uncompressed_bytes": 310236982,
+      "compressed_bytes": 15193439,
+      "crc32": "666116f9",
+      "uncompressed_sha256": "92e1d9d1d786757881208a5f43a5cde75fe9323d5f683e3427e25b3bd93983ef"
+    },
+    {
+      "name": "EinheitenStromSpeicher_9.xml",
+      "records": 100000,
+      "uncompressed_bytes": 310222980,
+      "compressed_bytes": 15314105,
+      "crc32": "155387ea",
+      "uncompressed_sha256": "413882a469e86dda6616a34a3a4b43000b7507a07672f1fa0b55996d9e4ccd31"
+    },
+    {
+      "name": "EinheitenStromSpeicher_10.xml",
+      "records": 100000,
+      "uncompressed_bytes": 310159550,
+      "compressed_bytes": 15444963,
+      "crc32": "8b7ad2ea",
+      "uncompressed_sha256": "3b042f9ea6490bb5ba2c57f5269d516e8f5fa24366cbd405a501ec35083462ee"
+    },
+    {
+      "name": "EinheitenStromSpeicher_11.xml",
+      "records": 100000,
+      "uncompressed_bytes": 310182354,
+      "compressed_bytes": 15549675,
+      "crc32": "3ae4ba76",
+      "uncompressed_sha256": "b2d5e9804a4a3f0140dfd0ffd15d01748fa8e30f830100dc050cabb91f9474d8"
+    },
+    {
+      "name": "EinheitenStromSpeicher_12.xml",
+      "records": 100000,
+      "uncompressed_bytes": 310090504,
+      "compressed_bytes": 15731147,
+      "crc32": "26e04070",
+      "uncompressed_sha256": "926ebd6e889d23c09b52e5e744b18cd5e1b81b099155dccb39c94094c3c9ee22"
+    },
+    {
+      "name": "EinheitenStromSpeicher_13.xml",
+      "records": 100000,
+      "uncompressed_bytes": 319066490,
+      "compressed_bytes": 16591078,
+      "crc32": "f8c16063",
+      "uncompressed_sha256": "88965d3e71db2b32f321294e519e5a03b6b57d728b9d20bd864f62c39653fcfa"
+    },
+    {
+      "name": "EinheitenStromSpeicher_14.xml",
+      "records": 100000,
+      "uncompressed_bytes": 326013874,
+      "compressed_bytes": 16960571,
+      "crc32": "b4e75a56",
+      "uncompressed_sha256": "e5639c531279b7b7361f7e67e200a3639d814a8727e3f83cfee1c574c9a44ba4"
+    },
+    {
+      "name": "EinheitenStromSpeicher_15.xml",
+      "records": 100000,
+      "uncompressed_bytes": 326285104,
+      "compressed_bytes": 16941979,
+      "crc32": "0179fe5f",
+      "uncompressed_sha256": "f3adba9cf06154113f458f813f55dda34fdfa70a4e2e5b02b91fb1b7adae16e9"
+    },
+    {
+      "name": "EinheitenStromSpeicher_16.xml",
+      "records": 100000,
+      "uncompressed_bytes": 325999824,
+      "compressed_bytes": 16951854,
+      "crc32": "b3661049",
+      "uncompressed_sha256": "8e32ff3269b88c0119f52586dc1efa8fd8ee1341af233ec1999be58d7394aacc"
+    },
+    {
+      "name": "EinheitenStromSpeicher_17.xml",
+      "records": 100000,
+      "uncompressed_bytes": 326020964,
+      "compressed_bytes": 16949009,
+      "crc32": "6f4b83bc",
+      "uncompressed_sha256": "1830982472aad1ac9ad6b5d33f6ea4db801020ff154d34a6509ba7ef12b1d693"
+    },
+    {
+      "name": "EinheitenStromSpeicher_18.xml",
+      "records": 100000,
+      "uncompressed_bytes": 325394128,
+      "compressed_bytes": 16876570,
+      "crc32": "a69825ee",
+      "uncompressed_sha256": "6da879078d7a668e3c4004494e2554db417588394d742d29fabce983c33d5401"
+    },
+    {
+      "name": "EinheitenStromSpeicher_19.xml",
+      "records": 100000,
+      "uncompressed_bytes": 325233286,
+      "compressed_bytes": 16702422,
+      "crc32": "e3ea687b",
+      "uncompressed_sha256": "a38b5e3af4a6e6b78e7e1f1cde09666bbd75788f92be3e28e8242d789e45c89d"
+    },
+    {
+      "name": "EinheitenStromSpeicher_20.xml",
+      "records": 100000,
+      "uncompressed_bytes": 325601994,
+      "compressed_bytes": 16652379,
+      "crc32": "3ae14445",
+      "uncompressed_sha256": "409c961dd523612b9b33c463eb20ee209c61b763cb6453803a122b0ca23d9f7e"
+    },
+    {
+      "name": "EinheitenStromSpeicher_21.xml",
+      "records": 100000,
+      "uncompressed_bytes": 325654668,
+      "compressed_bytes": 16599656,
+      "crc32": "bc557c00",
+      "uncompressed_sha256": "448ab8454742e68e91ce3011c3fc186a4a982d7c4cc6a966a9640400263ba2cc"
+    },
+    {
+      "name": "EinheitenStromSpeicher_22.xml",
+      "records": 100000,
+      "uncompressed_bytes": 325341086,
+      "compressed_bytes": 16638179,
+      "crc32": "c62d9cb8",
+      "uncompressed_sha256": "ce0776f11ce69a0b98828f8f87e43fe0ae30a2a7d7455f09a973d020ef6deb10"
+    },
+    {
+      "name": "EinheitenStromSpeicher_23.xml",
+      "records": 100000,
+      "uncompressed_bytes": 325979494,
+      "compressed_bytes": 16749721,
+      "crc32": "382f9e65",
+      "uncompressed_sha256": "27f7bc6bf41f187255c5fd4918e4f6094b2127e6bd397697c6f57bd84c7d2b11"
+    },
+    {
+      "name": "EinheitenStromSpeicher_24.xml",
+      "records": 100000,
+      "uncompressed_bytes": 324928852,
+      "compressed_bytes": 16639865,
+      "crc32": "ddea47db",
+      "uncompressed_sha256": "96bc1924d1cfab7e8ab11691c4b9af58bff18ee4b812cfc1f66042c854b7d6b8"
+    },
+    {
+      "name": "EinheitenStromSpeicher_25.xml",
+      "records": 100000,
+      "uncompressed_bytes": 324846314,
+      "compressed_bytes": 16294741,
+      "crc32": "17331822",
+      "uncompressed_sha256": "6e31efb0950899b567140037d3b8c406f1d1ccbab75b92bf3be03679ad796825"
+    },
+    {
+      "name": "EinheitenStromSpeicher_26.xml",
+      "records": 100000,
+      "uncompressed_bytes": 325294760,
+      "compressed_bytes": 16290560,
+      "crc32": "af576f22",
+      "uncompressed_sha256": "32af819e12ddfc8cf85a386084d8d48f8bef115e44137d9d1386cdb9afb5e889"
+    },
+    {
+      "name": "EinheitenStromSpeicher_27.xml",
+      "records": 100000,
+      "uncompressed_bytes": 327468582,
+      "compressed_bytes": 16335011,
+      "crc32": "b4f1a968",
+      "uncompressed_sha256": "a4f27e3e6acf31ccab757910a95efeeccb2996a97bbc6a36fe35c550837d41b5"
+    },
+    {
+      "name": "EinheitenStromSpeicher_28.xml",
+      "records": 100000,
+      "uncompressed_bytes": 327640486,
+      "compressed_bytes": 16302291,
+      "crc32": "cc9d9529",
+      "uncompressed_sha256": "c8186180a03f6ca7f8c255c76b6f86f61027391ed6efc1b4053eed240ecfad52"
+    },
+    {
+      "name": "EinheitenStromSpeicher_29.xml",
+      "records": 100000,
+      "uncompressed_bytes": 328231400,
+      "compressed_bytes": 16289153,
+      "crc32": "7d2559a1",
+      "uncompressed_sha256": "fe2cb3c698a227ae5c168a0e45459b07d6300df3c862fec8e36b09e823adf231"
+    },
+    {
+      "name": "EinheitenStromSpeicher_30.xml",
+      "records": 9826,
+      "uncompressed_bytes": 32275990,
+      "compressed_bytes": 1592017,
+      "crc32": "cf391373",
+      "uncompressed_sha256": "a075a5a2b9e3e64aa468da8e47e5b6bc08e91723029e5d9f40a6d0270935a169"
+    },
+    {
+      "name": "AnlagenStromSpeicher_1.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82658752,
+      "compressed_bytes": 4162616,
+      "crc32": "bad55742",
+      "uncompressed_sha256": "065efb4a45b3c80edbc35ac9dcec8af36b8a236a115bfca5faa9e14a091d4e97"
+    },
+    {
+      "name": "AnlagenStromSpeicher_2.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82669484,
+      "compressed_bytes": 4123971,
+      "crc32": "8b05c1d0",
+      "uncompressed_sha256": "98b4d045f8036251efe2c828b770c32a3777fba8629fd36f8ab88101041eda42"
+    },
+    {
+      "name": "AnlagenStromSpeicher_3.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82682638,
+      "compressed_bytes": 4088636,
+      "crc32": "d03ca358",
+      "uncompressed_sha256": "f3658aae6c5eae6dec5d13c12a16cf986fb52c73633f7a9daf6fc4f4a08e5076"
+    },
+    {
+      "name": "AnlagenStromSpeicher_4.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82689400,
+      "compressed_bytes": 4090823,
+      "crc32": "d5b0dc75",
+      "uncompressed_sha256": "41b6ad57164b34832984d5922dc38ff4850a25a509bfcb478794e65d333a2531"
+    },
+    {
+      "name": "AnlagenStromSpeicher_5.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82693776,
+      "compressed_bytes": 4109894,
+      "crc32": "26d1a11d",
+      "uncompressed_sha256": "237ae2ecce184fef21323b94b27c18aea1083bd4ac94cca67e6ac00e7ed717b6"
+    },
+    {
+      "name": "AnlagenStromSpeicher_6.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82694656,
+      "compressed_bytes": 4081323,
+      "crc32": "ccea4f51",
+      "uncompressed_sha256": "77f56e7470db53dba167c262f0432f573b6c7ae6aef0d41975f1ac38127d4d31"
+    },
+    {
+      "name": "AnlagenStromSpeicher_7.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82691652,
+      "compressed_bytes": 4058350,
+      "crc32": "d0d8cc78",
+      "uncompressed_sha256": "d87d47642c8f315bc0824e562644ddc7202e59826add9964c5aa1196b1a87e0c"
+    },
+    {
+      "name": "AnlagenStromSpeicher_8.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82689330,
+      "compressed_bytes": 4051054,
+      "crc32": "b97df41e",
+      "uncompressed_sha256": "ff3dbe2f56d3c45218600f1b39f31ddf7ee277b7f355aa096cc9e355fefb2f85"
+    },
+    {
+      "name": "AnlagenStromSpeicher_9.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82688716,
+      "compressed_bytes": 4048741,
+      "crc32": "2589b087",
+      "uncompressed_sha256": "398b3e0d65ea5030e69707649e521f9f3506667b2566be839379575923a6de2c"
+    },
+    {
+      "name": "AnlagenStromSpeicher_10.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82686790,
+      "compressed_bytes": 4046300,
+      "crc32": "bc5231dd",
+      "uncompressed_sha256": "cd85d3e62a492d05c1ede613833c359e6e18a5db912ec1a336ec56fda7b4a217"
+    },
+    {
+      "name": "AnlagenStromSpeicher_11.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82687346,
+      "compressed_bytes": 4036617,
+      "crc32": "7fe537c9",
+      "uncompressed_sha256": "9de0879261b3f45a96b69b27a28fbdaba20be24456c47ddd598f1d45048f4c92"
+    },
+    {
+      "name": "AnlagenStromSpeicher_12.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82688174,
+      "compressed_bytes": 4008177,
+      "crc32": "2d40c825",
+      "uncompressed_sha256": "14f2a1fd21a69fc45a3be1567bd98655ab62668d0595e1c00093ed14264548fd"
+    },
+    {
+      "name": "AnlagenStromSpeicher_13.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82685810,
+      "compressed_bytes": 4009318,
+      "crc32": "261f101a",
+      "uncompressed_sha256": "ce71a6e6be76f587a0806ed55cb04e3b7d17a6865ec2fb14a93df9dd7015fcc7"
+    },
+    {
+      "name": "AnlagenStromSpeicher_14.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82678538,
+      "compressed_bytes": 3987520,
+      "crc32": "e1fc988c",
+      "uncompressed_sha256": "f6ab4069872d6f6a27be24d842b8475427a63f259d0bff20c37ab7b696b6e186"
+    },
+    {
+      "name": "AnlagenStromSpeicher_15.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82679224,
+      "compressed_bytes": 3968910,
+      "crc32": "cae2c041",
+      "uncompressed_sha256": "fa1f90e59d7e3c01d653d5f31d3b1f185adadb51f103b7923ef58877b3742b4e"
+    },
+    {
+      "name": "AnlagenStromSpeicher_16.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82680664,
+      "compressed_bytes": 3980149,
+      "crc32": "3bb27098",
+      "uncompressed_sha256": "fad7555120107605f4058cc654447dd66f229c3973431150e289814b5ae601a0"
+    },
+    {
+      "name": "AnlagenStromSpeicher_17.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82688608,
+      "compressed_bytes": 3976162,
+      "crc32": "c8fdcd2b",
+      "uncompressed_sha256": "b8e6852b236e62dfc4441d71f5c8fc81f30ed80b26543857a464322ca021369f"
+    },
+    {
+      "name": "AnlagenStromSpeicher_18.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82685426,
+      "compressed_bytes": 3946512,
+      "crc32": "1585796c",
+      "uncompressed_sha256": "7269861b2ddea9b28fda992ab08dc0b80b742b75651459aed891fe78963198e1"
+    },
+    {
+      "name": "AnlagenStromSpeicher_19.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82674354,
+      "compressed_bytes": 3922826,
+      "crc32": "a129dbcd",
+      "uncompressed_sha256": "1784cb86280d799c7a533850b19a2637ebf46ac4379fb2721abb26213867c513"
+    },
+    {
+      "name": "AnlagenStromSpeicher_20.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82672214,
+      "compressed_bytes": 3921274,
+      "crc32": "93be4dd9",
+      "uncompressed_sha256": "7f851485d16eaed5858d499ec5ebef27d92d1564a5581e2ea4ba3c4391e943e6"
+    },
+    {
+      "name": "AnlagenStromSpeicher_21.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82671226,
+      "compressed_bytes": 3910512,
+      "crc32": "3fe5e2a8",
+      "uncompressed_sha256": "af63770cdbe7272d4814a8493a2fbd66a7f3c1aae1d5c0c5042299edc30f7856"
+    },
+    {
+      "name": "AnlagenStromSpeicher_22.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82676722,
+      "compressed_bytes": 3919916,
+      "crc32": "9dba88bb",
+      "uncompressed_sha256": "a77374419572b46ab5dee638262b1b30e01c341409292da1f659310cfa6658e7"
+    },
+    {
+      "name": "AnlagenStromSpeicher_23.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82685634,
+      "compressed_bytes": 3938233,
+      "crc32": "e506bee3",
+      "uncompressed_sha256": "15443b18208e0f4af579e9d79080f7e9f26398548dfcb9cc503b30fe1c1ad86e"
+    },
+    {
+      "name": "AnlagenStromSpeicher_24.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82685090,
+      "compressed_bytes": 3898856,
+      "crc32": "1f3f8d21",
+      "uncompressed_sha256": "d0fe98d27c9ca30ef0eda1d3e510277a1ec0e0557e9a372d19649f06211b1169"
+    },
+    {
+      "name": "AnlagenStromSpeicher_25.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82665456,
+      "compressed_bytes": 3854002,
+      "crc32": "0b54af33",
+      "uncompressed_sha256": "968f7b54b64be8c71d4ed1d5a12055c80acc9d425dc4c4870286d7a5a037d803"
+    },
+    {
+      "name": "AnlagenStromSpeicher_26.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82669606,
+      "compressed_bytes": 3829431,
+      "crc32": "b3d2ae67",
+      "uncompressed_sha256": "a0311aead1bfe152549b05d72e984206b3d94f96ff57aed670f827b98b908f3a"
+    },
+    {
+      "name": "AnlagenStromSpeicher_27.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82672360,
+      "compressed_bytes": 3811013,
+      "crc32": "0432263e",
+      "uncompressed_sha256": "a1ba732d32d455252975d85678d197361e81c19b0fe5de9d585832581c6bb47d"
+    },
+    {
+      "name": "AnlagenStromSpeicher_28.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82676028,
+      "compressed_bytes": 3783553,
+      "crc32": "f96da35f",
+      "uncompressed_sha256": "927bcd6e3353ce84e8e36a2ab17134166e1f63f5a3b9583a99c1e1138c83314b"
+    },
+    {
+      "name": "AnlagenStromSpeicher_29.xml",
+      "records": 100000,
+      "uncompressed_bytes": 82689304,
+      "compressed_bytes": 3735845,
+      "crc32": "8d8afd2a",
+      "uncompressed_sha256": "95349a9aeb4a1d7d7f0ca07558e943b811373ef1bb2f0636af2d519d4318ac6e"
+    },
+    {
+      "name": "AnlagenStromSpeicher_30.xml",
+      "records": 9745,
+      "uncompressed_bytes": 8059490,
+      "compressed_bytes": 360252,
+      "crc32": "2538e3e0",
+      "uncompressed_sha256": "a055a2eaa8bd92d9807cf414b2f43d7ff134b82aefc68f7347212f5abb300ae8"
+    }
+  ]
+}

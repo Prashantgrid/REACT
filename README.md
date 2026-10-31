@@ -135,3 +135,15 @@ climate-risk, power-system, or socio-economic analysis is intended as a second s
 - Classification rule stated as `P_sel >= 0.70` and `T > 0`; the permutation check is reported.
 - Fixed a missing line break in `REACT_v4.py` that prevented import, and a copula-cache key that
   ignored the state set in panel-deletion reruns.
+
+## MaStR storage by federal state
+
+A separate registered-stock snapshot is available in [`data/mastr_storage/2026-10-31/`](data/mastr_storage/2026-10-31/).
+It reports battery and all-storage power (MW) and registered usable energy (MWh) for all 16 states,
+with technology detail, missing-data checks, and source-file fingerprints. Reproduce it with
+[`tools/aggregate_mastr_storage.py`](tools/aggregate_mastr_storage.py); see the data-folder README.
+Raw energy totals contain a material registry anomaly; the table includes a separately labelled
+battery-energy screening comparison and an auditable flag file.
+This additional October 2026 snapshot is not automatically substituted into the manuscript's
+embedded structural inputs.
+
