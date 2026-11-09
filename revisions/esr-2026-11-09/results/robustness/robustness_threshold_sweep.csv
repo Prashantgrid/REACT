@@ -1,0 +1,26 @@
+threshold,state,domain,n_scenarios,scenarios
+0.6,Baden-Württemberg,Climate,3,Baseline; National Pool; Adjacency Flow
+0.6,Bayern,Climate,3,Baseline; National Pool; Adjacency Flow
+0.6,Brandenburg,Climate,3,Baseline; National Pool; Adjacency Flow
+0.6,Hamburg,Energy,3,Baseline; National Pool; Adjacency Flow
+0.6,Mecklenburg-Vorpommern,Adaptive,3,Baseline; National Pool; Adjacency Flow
+0.6,Sachsen,Climate,2,National Pool; Adjacency Flow
+0.6,__total__,,17,
+0.65,Baden-Württemberg,Climate,3,Baseline; National Pool; Adjacency Flow
+0.65,Bayern,Climate,3,Baseline; National Pool; Adjacency Flow
+0.65,Brandenburg,Climate,3,Baseline; National Pool; Adjacency Flow
+0.65,Hamburg,Energy,2,National Pool; Adjacency Flow
+0.65,Mecklenburg-Vorpommern,Adaptive,2,National Pool; Adjacency Flow
+0.65,Sachsen,Climate,2,National Pool; Adjacency Flow
+0.65,__total__,,15,
+0.7,Baden-Württemberg,Climate,3,Baseline; National Pool; Adjacency Flow
+0.7,Bayern,Climate,3,Baseline; National Pool; Adjacency Flow
+0.7,Brandenburg,Climate,2,National Pool; Adjacency Flow
+0.7,Sachsen,Climate,2,National Pool; Adjacency Flow
+0.7,__total__,,10,
+0.75,Baden-Württemberg,Climate,2,National Pool; Adjacency Flow
+0.75,Bayern,Climate,2,National Pool; Adjacency Flow
+0.75,__total__,,4,
+0.8,Baden-Württemberg,Climate,2,National Pool; Adjacency Flow
+0.8,Bayern,Climate,2,National Pool; Adjacency Flow
+0.8,__total__,,4,

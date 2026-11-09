@@ -1,0 +1,13 @@
+numpy>=1.26
+pandas>=2.0
+scipy>=1.11
+matplotlib>=3.8
+statsmodels>=0.14
+networkx>=3.2
+# REACT-PF (power-flow tier)
+pypsa>=0.30
+highspy>=1.7
+netCDF4>=1.6
+pvlib>=0.11
+shapely>=2.0
+pyproj>=3.6

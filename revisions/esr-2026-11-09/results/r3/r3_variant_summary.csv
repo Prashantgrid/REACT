@@ -1,0 +1,6 @@
+variant,r_energy_socio,n_identified,identified,hamburg,fill_h
+main,-0.818486055779714,10,BY-C(B); BW-C(B); BY-C(N); BW-C(N); BB-C(N); SN-C(N); BY-C(A); BW-C(A); BB-C(A); SN-C(A),"{'Baseline': ('Energy', 0.6164, False), 'National Pool': ('Energy', 0.6806, False), 'Adjacency Flow': ('Energy', 0.6587, False)}",
+no_import_penalty,-0.7643863968742415,11,BY-C(B); BW-C(B); BB-C(B); BY-C(N); BW-C(N); BB-C(N); MV-A(N); BY-C(A); BW-C(A); BB-C(A); MV-A(A),"{'Baseline': ('Energy', 0.6222, False), 'National Pool': ('Energy', 0.6815, False), 'Adjacency Flow': ('Energy', 0.6744, False)}",
+local_supply_only,-0.7049895905909402,10,BY-C(B); BW-C(B); HH-E(N); BY-C(N); BW-C(N); MV-A(N); HH-E(A); BY-C(A); BW-C(A); MV-A(A),"{'Baseline': ('Energy', 0.6928, False), 'National Pool': ('Energy', 0.7279, True), 'Adjacency Flow': ('Energy', 0.7257, True)}",
+network_access_only,-0.1107862789841089,0,,"{'Baseline': ('Energy', 0.4538, False), 'National Pool': ('Energy', 0.5524, False), 'Adjacency Flow': ('Energy', 0.5065, False)}",
+absolute_capacities,-0.25692735992384935,11,HH-E(B); BY-C(B); BW-C(B); HH-E(N); BY-C(N); BW-C(N); MV-A(N); HH-E(A); BY-C(A); BW-C(A); MV-A(A),"{'Baseline': ('Energy', 0.8147, True), 'National Pool': ('Energy', 0.8646, True), 'Adjacency Flow': ('Energy', 0.8481, True)}",

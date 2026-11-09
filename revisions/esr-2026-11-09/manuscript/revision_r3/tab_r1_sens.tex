@@ -1,0 +1,52 @@
+\begin{tabular}{@{}p{2.9cm}p{5.4cm}ccccp{3.1cm}c@{}}
+\toprule
+Group & Specification & BY-C & BW-C & BB-C & SN-C & Other identified & Rank $\rho$ \\
+\midrule
+Main & Main specification & 3/3 & 3/3 & 2/3 & 2/3 & -- & 1.00 \\
+\midrule
+Hazard record & Year-block bootstrap (30 replicates) & 100\% & 98\% & 97\% & 52\% & -- & 0.99 \\
+ & Fit to 1990--2007 & 3/3 & 3/3 & 3/3 & 1/3 & -- & 0.98 \\
+ & Fit to 2008--2024 & 3/3 & 3/3 & 2/3 & 0/3 & -- & 0.98 \\
+ & Trends removed, record at 2024 level & 3/3 & 3/3 & 3/3 & 0/3 & MV-S & 0.96 \\
+ & Gaussian copula & 3/3 & 3/3 & 2/3 & 2/3 & -- & 0.99 \\
+\midrule
+Support layer & Wind credit 0.05 & 2/2 & 2/2 & 2/2 & 2/2 & -- & 1.00 \\
+ & Wind credit 0.20 & 2/2 & 2/2 & 2/2 & 2/2 & -- & 1.00 \\
+ & PV credit 0 & 2/2 & 2/2 & 2/2 & 2/2 & -- & 1.00 \\
+ & PV credit 0.10 & 2/2 & 2/2 & 2/2 & 2/2 & -- & 1.00 \\
+ & Thermal credit 0.70 & 2/2 & 2/2 & 2/2 & 2/2 & -- & 1.00 \\
+ & Thermal credit 0.95 & 2/2 & 2/2 & 2/2 & 2/2 & -- & 1.00 \\
+ & Storage window 2~h & 2/2 & 2/2 & 2/2 & 2/2 & -- & 1.00 \\
+ & Storage window 8~h & 2/2 & 2/2 & 2/2 & 2/2 & -- & 1.00 \\
+ & $\phi=0.125$ & 2/2 & 2/2 & 2/2 & 2/2 & -- & 0.99 \\
+ & $\phi=0.50$ & 2/2 & 2/2 & 2/2 & 2/2 & -- & 1.00 \\
+ & Penalty cap 0.25 & 2/2 & 2/2 & 2/2 & 2/2 & -- & 1.00 \\
+ & Penalty cap 1.0 & 2/2 & 2/2 & 2/2 & 2/2 & -- & 1.00 \\
+ & Adjacency losses $\times0.7$ & 2/2 & 2/2 & 2/2 & 2/2 & -- & 1.00 \\
+ & Adjacency losses $\times1.3$ & 2/2 & 2/2 & 2/2 & 2/2 & -- & 1.00 \\
+\midrule
+Thermal capacity & Thermal capacity excluded & 3/3 & 3/3 & 0/3 & 0/3 & -- & 0.94 \\
+\midrule
+Weights & Dirichlet $\alpha=0.5$ & 3/3 & 2/3 & 0/3 & 0/3 & -- & 0.98 \\
+ & Dirichlet $\alpha=2$ & 3/3 & 3/3 & 3/3 & 2/3 & HH-E & 0.99 \\
+ & Dirichlet $\alpha=5$ & 3/3 & 3/3 & 3/3 & 2/3 & HH-E & 0.96 \\
+ & Climate emphasis (0.5/0.25/0.25) & 3/3 & 3/3 & 2/3 & 1/3 & -- & 0.84 \\
+ & Energy emphasis (0.25/0.5/0.25) & 3/3 & 3/3 & 2/3 & 1/3 & -- & 0.60 \\
+ & Socio-economic emphasis (0.25/0.25/0.5) & 3/3 & 3/3 & 2/3 & 1/3 & -- & 0.67 \\
+\midrule
+Derating & No derating of Energy System indicators & 3/3 & 3/3 & 2/3 & 1/3 & -- & 0.99 \\
+\midrule
+Socio-economic indicators & Without GDP per capita (2022) & 3/3 & 3/3 & 2/3 & 1/3 & HH-E & 0.93 \\
+ & Without human development (2022) & 3/3 & 3/3 & 2/3 & 0/3 & -- & 0.96 \\
+ & Without patents (2019) & 3/3 & 2/3 & 3/3 & 2/3 & -- & 0.96 \\
+ & Without age dependency (2025) & 3/3 & 3/3 & 0/3 & 2/3 & -- & 0.90 \\
+\midrule
+Observed inputs & Official DWD hot-day series & 3/3 & 3/3 & 2/3 & 2/3 & -- & 1.00 \\
+\midrule
+Warming assumptions & $+2$~K, low-wind days 0\%/K & 3/3 & 3/3 & 2/3 & 2/3 & -- & 1.00 \\
+ & $+2$~K, low-wind days 4\%/K & 3/3 & 3/3 & 2/3 & 2/3 & -- & 1.00 \\
+ & $+2$~K, heavy-precipitation days 10\%/K & 3/3 & 3/3 & 2/3 & 2/3 & -- & 1.00 \\
+ & $+2$~K, reference assumptions & 3/3 & 3/3 & 2/3 & 2/3 & -- & 1.00 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\raggedright\scriptsize Cells: scenarios in which the case is identified, of the scenarios run (support-layer variants affect only the two spatially coherent scenarios). Bootstrap: share of replicate--scenario runs in which the case is identified, over the scenarios in which it is identified in the main specification; other cases listed if identified in at least 10\% of replicates. Rank $\rho$: minimum over scenarios of the expected-rank correlation with the main specification (bootstrap: median over replicates). Emphasis profiles: Dirichlet domain weights with the stated means and concentration 8.
