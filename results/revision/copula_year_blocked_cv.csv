@@ -1,6 +1,0 @@
-family,heldout_loglik
-gaussian,429.65116691600997
-student_t,475.76340400419184
-clayton,37.40027699805602
-gumbel,47.768489596262455
-student_t_df_selected_per_fold,9.5;7.5;7.5;9.5;8.5

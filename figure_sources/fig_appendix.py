@@ -1,4 +1,4 @@
-"""Appendix figures: hazard dependence diagnostics, resilience value function, r_i vs C_i.
+"""Appendix figures: hazard dependence diagnostics, external-support score function, r_i vs C_i.
 Replace fig02_correlations.pdf, Resilience_Function.pdf, fig11_ri_vs_Ci.pdf.
 """
 import matplotlib.pyplot as plt
@@ -77,7 +77,7 @@ ax.set_xlim(-1.02, 1.02)
 ax.set_ylim(-0.02, 1.32)
 ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
 ax.set_xlabel(r"Relative net-import indicator $r_i=N_i/\max_j|N_j|$ (imports positive)")
-ax.set_ylabel(r"Resilience value $R(r_i)$")
+ax.set_ylabel(r"External-support score $S(r_i)$")
 ax.spines["left"].set_bounds(0, 1.0)
 S.save(fig, "Resilience_Function")
 

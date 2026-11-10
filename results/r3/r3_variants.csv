@@ -1,0 +1,241 @@
+variant,scenario,state,provisional,P_sel,T,identified,expected_rank,rank_rho_vs_main
+main,Baseline,Hamburg,Energy,0.6164,0.23336350444812348,False,6.033,1.0
+main,Baseline,Bayern,Climate,0.7355,0.714660398693694,True,7.8795,1.0
+main,Baseline,Hessen,Energy,0.4682,0.17826757868145088,False,7.4055,1.0
+main,Baseline,Baden-Württemberg,Climate,0.7169,0.7611912494187673,True,8.2355,1.0
+main,Baseline,Niedersachsen,Energy,0.3383,-0.16873726861676636,False,6.9775,1.0
+main,Baseline,Bremen,Energy,0.3617,-0.5556277716785856,False,5.448,1.0
+main,Baseline,Nordrhein-Westfalen,Energy,0.5259,0.23049732082981422,False,9.7895,1.0
+main,Baseline,Berlin,Energy,0.4796,0.45069681196080463,False,8.1795,1.0
+main,Baseline,Schleswig-Holstein,Adaptive,0.4207,-0.07947564025375008,False,7.46,1.0
+main,Baseline,Rheinland-Pfalz,Energy,0.4731,0.11642416035173686,False,10.1385,1.0
+main,Baseline,Saarland,Adaptive,0.4357,0.2654436517538691,False,9.355,1.0
+main,Baseline,Thüringen,Adaptive,0.5365,0.48187238706351465,False,10.102,1.0
+main,Baseline,Brandenburg,Climate,0.6881,0.2853746731806759,False,7.8255,1.0
+main,Baseline,Mecklenburg-Vorpommern,Adaptive,0.6178,0.4618369724785062,False,8.627,1.0
+main,Baseline,Sachsen,Climate,0.5723,0.4247100224976049,False,9.51,1.0
+main,Baseline,Sachsen-Anhalt,Adaptive,0.5035,0.3768639766912636,False,13.034,1.0
+main,National Pool,Hamburg,Energy,0.6806,0.2748068703965678,False,5.231,1.0
+main,National Pool,Bayern,Climate,0.8039,0.8550179919471927,True,8.128,1.0
+main,National Pool,Hessen,Energy,0.4863,0.18363544715788105,False,7.079,1.0
+main,National Pool,Baden-Württemberg,Climate,0.8139,1.0055714481660467,True,8.6805,1.0
+main,National Pool,Niedersachsen,Adaptive,0.3697,-0.15486603443860464,False,6.6495,1.0
+main,National Pool,Bremen,Energy,0.3952,-0.5891875460377378,False,4.7205,1.0
+main,National Pool,Nordrhein-Westfalen,Energy,0.546,0.1969844342404009,False,9.572,1.0
+main,National Pool,Berlin,Energy,0.4397,0.17238807697032343,False,8.5555,1.0
+main,National Pool,Schleswig-Holstein,Adaptive,0.4522,-0.05528762403553976,False,7.026,1.0
+main,National Pool,Rheinland-Pfalz,Energy,0.4946,0.11348819672182364,False,10.014,1.0
+main,National Pool,Saarland,Adaptive,0.4597,0.32735552526544875,False,9.578,1.0
+main,National Pool,Thüringen,Adaptive,0.5721,0.4758339449039771,False,10.1785,1.0
+main,National Pool,Brandenburg,Climate,0.7299,0.410292423239145,True,8.1745,1.0
+main,National Pool,Mecklenburg-Vorpommern,Adaptive,0.6769,0.5192795751948908,False,8.273,1.0
+main,National Pool,Sachsen,Climate,0.7056,0.7267048288340212,True,10.454,1.0
+main,National Pool,Sachsen-Anhalt,Adaptive,0.4583,0.3041288278216778,False,13.686,1.0
+main,Adjacency Flow,Hamburg,Energy,0.6587,0.18117809854970532,False,4.96,1.0
+main,Adjacency Flow,Bayern,Climate,0.812,0.8704153316894255,True,8.273,1.0
+main,Adjacency Flow,Hessen,Energy,0.4752,0.1233660098396191,False,6.853,1.0
+main,Adjacency Flow,Baden-Württemberg,Climate,0.8077,1.017636859279073,True,8.834,1.0
+main,Adjacency Flow,Niedersachsen,Adaptive,0.3663,-0.16515874263839536,False,6.567,1.0
+main,Adjacency Flow,Bremen,Energy,0.4001,-0.5662759380967148,False,4.565,1.0
+main,Adjacency Flow,Nordrhein-Westfalen,Energy,0.5168,0.16979196444532108,False,9.165,1.0
+main,Adjacency Flow,Berlin,Energy,0.4735,0.35687630714527147,False,8.699,1.0
+main,Adjacency Flow,Schleswig-Holstein,Adaptive,0.4415,-0.07683292529149434,False,7.058,1.0
+main,Adjacency Flow,Rheinland-Pfalz,Energy,0.5451,0.1666651525460522,False,10.8595,1.0
+main,Adjacency Flow,Saarland,Adaptive,0.4561,0.3432742796488891,False,9.382,1.0
+main,Adjacency Flow,Thüringen,Adaptive,0.5698,0.43365273396588366,False,10.412,1.0
+main,Adjacency Flow,Brandenburg,Climate,0.7211,0.4369016025264555,True,8.0395,1.0
+main,Adjacency Flow,Mecklenburg-Vorpommern,Adaptive,0.6681,0.46492930901160223,False,8.2185,1.0
+main,Adjacency Flow,Sachsen,Climate,0.7191,0.7651565188341791,True,10.516,1.0
+main,Adjacency Flow,Sachsen-Anhalt,Adaptive,0.4527,0.26530145127701465,False,13.5985,1.0
+no_import_penalty,Baseline,Hamburg,Energy,0.6222,0.12936628606494766,False,5.6825,0.9294117647058824
+no_import_penalty,Baseline,Bayern,Climate,0.76,0.6951635382112094,True,7.354,0.9294117647058824
+no_import_penalty,Baseline,Hessen,Energy,0.4263,0.0014914373691326177,False,6.898,0.9294117647058824
+no_import_penalty,Baseline,Baden-Württemberg,Climate,0.7158,0.7670084360695086,True,7.953,0.9294117647058824
+no_import_penalty,Baseline,Niedersachsen,Energy,0.3789,0.008590126302579338,False,7.4755,0.9294117647058824
+no_import_penalty,Baseline,Bremen,Energy,0.4479,-0.09517314812636417,False,5.9375,0.9294117647058824
+no_import_penalty,Baseline,Nordrhein-Westfalen,Energy,0.4992,0.22939723988629712,False,9.638,0.9294117647058824
+no_import_penalty,Baseline,Berlin,Energy,0.4788,0.4129483546718026,False,8.115,0.9294117647058824
+no_import_penalty,Baseline,Schleswig-Holstein,Adaptive,0.4425,-0.028399792689673117,False,7.382,0.9294117647058824
+no_import_penalty,Baseline,Rheinland-Pfalz,Energy,0.4219,0.07068530309472376,False,9.6615,0.9294117647058824
+no_import_penalty,Baseline,Saarland,Adaptive,0.4664,0.1969755264315577,False,10.0775,0.9294117647058824
+no_import_penalty,Baseline,Thüringen,Adaptive,0.56,0.4255226913365967,False,10.696,0.9294117647058824
+no_import_penalty,Baseline,Brandenburg,Climate,0.704,0.27596872385260296,True,7.5425,0.9294117647058824
+no_import_penalty,Baseline,Mecklenburg-Vorpommern,Adaptive,0.6327,0.4664196057528287,False,8.7315,0.9294117647058824
+no_import_penalty,Baseline,Sachsen,Climate,0.5202,0.2528677656367734,False,9.7545,0.9294117647058824
+no_import_penalty,Baseline,Sachsen-Anhalt,Adaptive,0.5047,0.4024540841663027,False,13.101,0.9294117647058824
+no_import_penalty,National Pool,Hamburg,Energy,0.6815,0.17271431807365686,False,5.027,0.9823529411764707
+no_import_penalty,National Pool,Bayern,Climate,0.8227,0.8370061642792846,True,7.818,0.9823529411764707
+no_import_penalty,National Pool,Hessen,Energy,0.4462,0.006258450414574195,False,6.577,0.9823529411764707
+no_import_penalty,National Pool,Baden-Württemberg,Climate,0.8018,0.9857011731512781,True,8.5425,0.9823529411764707
+no_import_penalty,National Pool,Niedersachsen,Energy,0.3948,-0.014084919433506305,False,6.9195,0.9823529411764707
+no_import_penalty,National Pool,Bremen,Energy,0.4827,-0.1054788810360219,False,5.3675,0.9823529411764707
+no_import_penalty,National Pool,Nordrhein-Westfalen,Energy,0.5228,0.20878844457777535,False,9.3825,0.9823529411764707
+no_import_penalty,National Pool,Berlin,Energy,0.4578,0.1876946198053696,False,8.518,0.9823529411764707
+no_import_penalty,National Pool,Schleswig-Holstein,Adaptive,0.4713,-0.011714035918481244,False,7.1265,0.9823529411764707
+no_import_penalty,National Pool,Rheinland-Pfalz,Energy,0.4448,0.06358351023991349,False,9.4905,0.9823529411764707
+no_import_penalty,National Pool,Saarland,Adaptive,0.4908,0.24091747765692112,False,10.3965,0.9823529411764707
+no_import_penalty,National Pool,Thüringen,Adaptive,0.5836,0.42928034883082733,False,10.5585,0.9823529411764707
+no_import_penalty,National Pool,Brandenburg,Climate,0.7415,0.3752348010269573,True,7.6285,0.9823529411764707
+no_import_penalty,National Pool,Mecklenburg-Vorpommern,Adaptive,0.7064,0.4812164755106887,True,8.1785,0.9823529411764707
+no_import_penalty,National Pool,Sachsen,Climate,0.6312,0.518346570077233,False,10.66,0.9823529411764707
+no_import_penalty,National Pool,Sachsen-Anhalt,Adaptive,0.4495,0.26926610759420666,False,13.809,0.9823529411764707
+no_import_penalty,Adjacency Flow,Hamburg,Energy,0.6744,0.14124254825625185,False,4.8755,0.9705882352941176
+no_import_penalty,Adjacency Flow,Bayern,Climate,0.8257,0.8423551125107365,True,7.6405,0.9705882352941176
+no_import_penalty,Adjacency Flow,Hessen,Energy,0.4399,-0.0019788445338788678,False,6.3815,0.9705882352941176
+no_import_penalty,Adjacency Flow,Baden-Württemberg,Climate,0.8045,1.0112839160832081,True,8.319,0.9705882352941176
+no_import_penalty,Adjacency Flow,Niedersachsen,Adaptive,0.3895,-0.039089323561804744,False,6.777,0.9705882352941176
+no_import_penalty,Adjacency Flow,Bremen,Energy,0.4725,-0.19036328625392776,False,5.1845,0.9705882352941176
+no_import_penalty,Adjacency Flow,Nordrhein-Westfalen,Energy,0.4998,0.1698223351136155,False,8.9005,0.9705882352941176
+no_import_penalty,Adjacency Flow,Berlin,Energy,0.4783,0.2518277943944367,False,8.625,0.9705882352941176
+no_import_penalty,Adjacency Flow,Schleswig-Holstein,Adaptive,0.4632,-0.061321521278521675,False,7.036,0.9705882352941176
+no_import_penalty,Adjacency Flow,Rheinland-Pfalz,Energy,0.5327,0.18058202723456152,False,10.435,0.9705882352941176
+no_import_penalty,Adjacency Flow,Saarland,Adaptive,0.4885,0.2816684061721502,False,10.1825,0.9705882352941176
+no_import_penalty,Adjacency Flow,Thüringen,Adaptive,0.5805,0.3845162768476208,False,10.959,0.9705882352941176
+no_import_penalty,Adjacency Flow,Brandenburg,Climate,0.7421,0.43028930937385934,True,7.938,0.9705882352941176
+no_import_penalty,Adjacency Flow,Mecklenburg-Vorpommern,Adaptive,0.7066,0.46289159030289906,True,8.2775,0.9705882352941176
+no_import_penalty,Adjacency Flow,Sachsen,Climate,0.6468,0.577266016326665,False,10.677,0.9705882352941176
+no_import_penalty,Adjacency Flow,Sachsen-Anhalt,Adaptive,0.4791,0.30791850799805864,False,13.7915,0.9705882352941176
+local_supply_only,Baseline,Hamburg,Energy,0.6928,0.4352210431157601,False,7.388,0.6764705882352942
+local_supply_only,Baseline,Bayern,Climate,0.8327,0.6356518286018042,True,6.6005,0.6764705882352942
+local_supply_only,Baseline,Hessen,Energy,0.4688,0.16850128638375145,False,8.188,0.6764705882352942
+local_supply_only,Baseline,Baden-Württemberg,Climate,0.834,0.7673243027181147,True,7.542,0.6764705882352942
+local_supply_only,Baseline,Niedersachsen,Adaptive,0.3593,-0.04848807457489839,False,7.487,0.6764705882352942
+local_supply_only,Baseline,Bremen,Energy,0.6031,0.4652448073403111,False,7.927,0.6764705882352942
+local_supply_only,Baseline,Nordrhein-Westfalen,Energy,0.4289,0.14425438751333575,False,9.2165,0.6764705882352942
+local_supply_only,Baseline,Berlin,Energy,0.533,0.49988943153524523,False,9.309,0.6764705882352942
+local_supply_only,Baseline,Schleswig-Holstein,Adaptive,0.4439,-0.20722459196895027,False,6.7535,0.6764705882352942
+local_supply_only,Baseline,Rheinland-Pfalz,Energy,0.441,0.09584937941417337,False,10.348,0.6764705882352942
+local_supply_only,Baseline,Saarland,Adaptive,0.4628,0.3108751027943836,False,8.9505,0.6764705882352942
+local_supply_only,Baseline,Thüringen,Adaptive,0.5441,0.2861338683454351,False,11.481,0.6764705882352942
+local_supply_only,Baseline,Brandenburg,Climate,0.5749,-0.06343101418907252,False,6.6305,0.6764705882352942
+local_supply_only,Baseline,Mecklenburg-Vorpommern,Adaptive,0.6565,0.1721486792056791,False,7.1195,0.6764705882352942
+local_supply_only,Baseline,Sachsen,Climate,0.5099,0.2313822935803147,False,8.7135,0.6764705882352942
+local_supply_only,Baseline,Sachsen-Anhalt,Adaptive,0.5078,0.3880344724710718,False,12.3455,0.6764705882352942
+local_supply_only,National Pool,Hamburg,Energy,0.7279,0.3560198820375613,True,6.913,0.7970588235294117
+local_supply_only,National Pool,Bayern,Climate,0.8696,0.7848066507459917,True,7.0385,0.7970588235294117
+local_supply_only,National Pool,Hessen,Energy,0.4745,0.13676576649755826,False,7.999,0.7970588235294117
+local_supply_only,National Pool,Baden-Württemberg,Climate,0.8821,0.9866067089762955,True,8.124,0.7970588235294117
+local_supply_only,National Pool,Niedersachsen,Energy,0.3854,-0.06681987946276219,False,6.858,0.7970588235294117
+local_supply_only,National Pool,Bremen,Energy,0.6287,0.45655227144113686,False,7.305,0.7970588235294117
+local_supply_only,National Pool,Nordrhein-Westfalen,Energy,0.4432,0.11533510500452454,False,9.1085,0.7970588235294117
+local_supply_only,National Pool,Berlin,Energy,0.4979,0.27983312912978175,False,9.947,0.7970588235294117
+local_supply_only,National Pool,Schleswig-Holstein,Adaptive,0.4894,-0.2441793171959776,False,6.132,0.7970588235294117
+local_supply_only,National Pool,Rheinland-Pfalz,Energy,0.4479,0.09021919751139029,False,10.218,0.7970588235294117
+local_supply_only,National Pool,Saarland,Adaptive,0.4797,0.34297432700712793,False,9.252,0.7970588235294117
+local_supply_only,National Pool,Thüringen,Adaptive,0.5643,0.29395923965230397,False,11.3575,0.7970588235294117
+local_supply_only,National Pool,Brandenburg,Climate,0.5956,0.010024172871215008,False,6.883,0.7970588235294117
+local_supply_only,National Pool,Mecklenburg-Vorpommern,Adaptive,0.7242,0.15458533222720933,True,6.5545,0.7970588235294117
+local_supply_only,National Pool,Sachsen,Climate,0.5751,0.379417645540823,False,9.4575,0.7970588235294117
+local_supply_only,National Pool,Sachsen-Anhalt,Adaptive,0.4421,0.23152972628839996,False,12.8525,0.7970588235294117
+local_supply_only,Adjacency Flow,Hamburg,Energy,0.7257,0.35194385668957745,True,6.651,0.8205882352941177
+local_supply_only,Adjacency Flow,Bayern,Climate,0.8685,0.7898271156777875,True,6.938,0.8205882352941177
+local_supply_only,Adjacency Flow,Hessen,Energy,0.4799,0.14031127382102437,False,7.7715,0.8205882352941177
+local_supply_only,Adjacency Flow,Baden-Württemberg,Climate,0.8791,0.988280257705245,True,7.9725,0.8205882352941177
+local_supply_only,Adjacency Flow,Niedersachsen,Adaptive,0.3917,-0.03975916820305657,False,6.8535,0.8205882352941177
+local_supply_only,Adjacency Flow,Bremen,Energy,0.6097,0.42454891361801506,False,7.1825,0.8205882352941177
+local_supply_only,Adjacency Flow,Nordrhein-Westfalen,Energy,0.4417,0.11108096391580827,False,9.0035,0.8205882352941177
+local_supply_only,Adjacency Flow,Berlin,Energy,0.5,0.3080266317268545,False,9.768,0.8205882352941177
+local_supply_only,Adjacency Flow,Schleswig-Holstein,Adaptive,0.4703,-0.28763379428450786,False,6.2455,0.8205882352941177
+local_supply_only,Adjacency Flow,Rheinland-Pfalz,Energy,0.4479,0.09339141580636667,False,10.264,0.8205882352941177
+local_supply_only,Adjacency Flow,Saarland,Adaptive,0.4835,0.3379546270295294,False,9.3185,0.8205882352941177
+local_supply_only,Adjacency Flow,Thüringen,Adaptive,0.5579,0.2631062819014489,False,11.5095,0.8205882352941177
+local_supply_only,Adjacency Flow,Brandenburg,Climate,0.5835,-0.04797612933192584,False,6.9765,0.8205882352941177
+local_supply_only,Adjacency Flow,Mecklenburg-Vorpommern,Adaptive,0.7234,0.15577900867114547,True,6.829,0.8205882352941177
+local_supply_only,Adjacency Flow,Sachsen,Climate,0.5787,0.3823047939872674,False,9.701,0.8205882352941177
+local_supply_only,Adjacency Flow,Sachsen-Anhalt,Adaptive,0.448,0.25634195533198967,False,13.0155,0.8205882352941177
+network_access_only,Baseline,Hamburg,Energy,0.4538,-0.4782861212189675,False,3.5105,0.65
+network_access_only,Baseline,Bayern,Energy,0.4883,0.009095169257206104,False,9.3665,0.65
+network_access_only,Baseline,Hessen,Climate,0.4982,-0.06074606763026502,False,4.7615,0.65
+network_access_only,Baseline,Baden-Württemberg,Energy,0.5634,0.22814687970189707,False,9.238,0.65
+network_access_only,Baseline,Niedersachsen,Energy,0.4373,0.05889653839697648,False,7.2155,0.65
+network_access_only,Baseline,Bremen,Adaptive,0.4113,-0.29295401948788824,False,4.0075,0.65
+network_access_only,Baseline,Nordrhein-Westfalen,Energy,0.5899,0.5205417126761154,False,10.1145,0.65
+network_access_only,Baseline,Berlin,Climate,0.5031,0.2041087316985728,False,6.3595,0.65
+network_access_only,Baseline,Schleswig-Holstein,Energy,0.5308,0.24057977896716087,False,9.7055,0.65
+network_access_only,Baseline,Rheinland-Pfalz,Climate,0.3648,-0.06384164490543523,False,7.4175,0.65
+network_access_only,Baseline,Saarland,Energy,0.4758,0.11753734111098102,False,11.8005,0.65
+network_access_only,Baseline,Thüringen,Adaptive,0.6059,0.5027050497128676,False,7.9385,0.65
+network_access_only,Baseline,Brandenburg,Adaptive,0.4927,0.1962401371986851,False,8.249,0.65
+network_access_only,Baseline,Mecklenburg-Vorpommern,Adaptive,0.5403,0.20445156637719397,False,12.4865,0.65
+network_access_only,Baseline,Sachsen,Climate,0.4161,-0.02899553813327893,False,10.941,0.65
+network_access_only,Baseline,Sachsen-Anhalt,Adaptive,0.5566,0.40271539449804694,False,12.888,0.65
+network_access_only,National Pool,Hamburg,Energy,0.5524,-0.32930795100563437,False,3.1055,0.6705882352941177
+network_access_only,National Pool,Bayern,Climate,0.572,0.2635609931225871,False,9.856,0.6705882352941177
+network_access_only,National Pool,Hessen,Climate,0.47,-0.1088296825107617,False,4.6495,0.6705882352941177
+network_access_only,National Pool,Baden-Württemberg,Climate,0.5605,0.21751710730500307,False,9.892,0.6705882352941177
+network_access_only,National Pool,Niedersachsen,Energy,0.4739,0.0907349238903854,False,6.8645,0.6705882352941177
+network_access_only,National Pool,Bremen,Adaptive,0.4484,-0.27610295994267775,False,3.665,0.6705882352941177
+network_access_only,National Pool,Nordrhein-Westfalen,Energy,0.6698,0.6172799592686316,False,9.828,0.6705882352941177
+network_access_only,National Pool,Berlin,Climate,0.596,0.4916264592035804,False,6.762,0.6705882352941177
+network_access_only,National Pool,Schleswig-Holstein,Energy,0.5877,0.381541738505336,False,9.075,0.6705882352941177
+network_access_only,National Pool,Rheinland-Pfalz,Adaptive,0.3689,-0.0252568157340892,False,7.2795,0.6705882352941177
+network_access_only,National Pool,Saarland,Energy,0.4688,0.06649952704949647,False,11.9385,0.6705882352941177
+network_access_only,National Pool,Thüringen,Adaptive,0.6189,0.467203407190988,False,7.8745,0.6705882352941177
+network_access_only,National Pool,Brandenburg,Adaptive,0.4717,0.04886310335784705,False,8.311,0.6705882352941177
+network_access_only,National Pool,Mecklenburg-Vorpommern,Adaptive,0.5183,0.05878262123097455,False,11.697,0.6705882352941177
+network_access_only,National Pool,Sachsen,Climate,0.5447,0.268082564159978,False,11.756,0.6705882352941177
+network_access_only,National Pool,Sachsen-Anhalt,Adaptive,0.4962,0.0833297136895137,False,13.446,0.6705882352941177
+network_access_only,Adjacency Flow,Hamburg,Energy,0.5065,-0.4550895444703938,False,2.829,0.7852941176470588
+network_access_only,Adjacency Flow,Bayern,Climate,0.5469,0.21259502669344432,False,10.131,0.7852941176470588
+network_access_only,Adjacency Flow,Hessen,Climate,0.5416,-0.006111453778041891,False,4.5635,0.7852941176470588
+network_access_only,Adjacency Flow,Baden-Württemberg,Climate,0.5097,0.05157119465390081,False,10.1065,0.7852941176470588
+network_access_only,Adjacency Flow,Niedersachsen,Energy,0.4325,0.006674428594603994,False,6.3685,0.7852941176470588
+network_access_only,Adjacency Flow,Bremen,Climate,0.4125,-0.4799008052256852,False,3.292,0.7852941176470588
+network_access_only,Adjacency Flow,Nordrhein-Westfalen,Energy,0.5747,0.4165679644006497,False,8.878,0.7852941176470588
+network_access_only,Adjacency Flow,Berlin,Climate,0.5476,0.37119146568478195,False,7.413,0.7852941176470588
+network_access_only,Adjacency Flow,Schleswig-Holstein,Energy,0.5588,0.2920384410825563,False,8.401,0.7852941176470588
+network_access_only,Adjacency Flow,Rheinland-Pfalz,Energy,0.6311,0.46894496598139446,False,10.8845,0.7852941176470588
+network_access_only,Adjacency Flow,Saarland,Adaptive,0.4453,0.0849903996654191,False,11.271,0.7852941176470588
+network_access_only,Adjacency Flow,Thüringen,Adaptive,0.6094,0.44345349290189007,False,8.0985,0.7852941176470588
+network_access_only,Adjacency Flow,Brandenburg,Climate,0.492,0.08337848567606537,False,8.395,0.7852941176470588
+network_access_only,Adjacency Flow,Mecklenburg-Vorpommern,Adaptive,0.535,0.10113171777144059,False,11.137,0.7852941176470588
+network_access_only,Adjacency Flow,Sachsen,Climate,0.5865,0.33952339848233726,False,11.189,0.7852941176470588
+network_access_only,Adjacency Flow,Sachsen-Anhalt,Adaptive,0.4906,0.03323197343784434,False,13.0425,0.7852941176470588
+absolute_capacities,Baseline,Hamburg,Energy,0.8147,0.8367555544808183,True,6.362,0.6264705882352941
+absolute_capacities,Baseline,Bayern,Climate,0.8303,0.6417049404415449,True,5.829,0.6264705882352941
+absolute_capacities,Baseline,Hessen,Energy,0.466,0.09645610111329045,False,6.631,0.6264705882352941
+absolute_capacities,Baseline,Baden-Württemberg,Climate,0.7252,0.7773915984493678,True,6.6635,0.6264705882352941
+absolute_capacities,Baseline,Niedersachsen,Adaptive,0.4721,-0.4520878293862457,False,4.9125,0.6264705882352941
+absolute_capacities,Baseline,Bremen,Energy,0.6208,0.32758769594949666,False,6.9325,0.6264705882352941
+absolute_capacities,Baseline,Nordrhein-Westfalen,Adaptive,0.4545,-0.2346340482455267,False,5.922,0.6264705882352941
+absolute_capacities,Baseline,Berlin,Energy,0.6743,0.8104424271271462,False,9.013,0.6264705882352941
+absolute_capacities,Baseline,Schleswig-Holstein,Adaptive,0.5128,0.17430625300703906,False,8.1575,0.6264705882352941
+absolute_capacities,Baseline,Rheinland-Pfalz,Energy,0.3926,0.08234877715959879,False,9.403,0.6264705882352941
+absolute_capacities,Baseline,Saarland,Energy,0.439,0.1006547442811172,False,11.244,0.6264705882352941
+absolute_capacities,Baseline,Thüringen,Adaptive,0.6218,0.7118317391580622,False,10.525,0.6264705882352941
+absolute_capacities,Baseline,Brandenburg,Adaptive,0.5909,0.46915827751017103,False,8.9665,0.6264705882352941
+absolute_capacities,Baseline,Mecklenburg-Vorpommern,Adaptive,0.6728,0.6462671177317968,False,11.1555,0.6264705882352941
+absolute_capacities,Baseline,Sachsen,Adaptive,0.4094,0.04282816899540426,False,10.9445,0.6264705882352941
+absolute_capacities,Baseline,Sachsen-Anhalt,Adaptive,0.5343,0.3390549684815717,False,13.3385,0.6264705882352941
+absolute_capacities,National Pool,Hamburg,Energy,0.8646,0.8029870765577327,True,5.503,0.7735294117647058
+absolute_capacities,National Pool,Bayern,Climate,0.8882,0.7974551203154676,True,6.0645,0.7735294117647058
+absolute_capacities,National Pool,Hessen,Energy,0.4759,0.0852432029462236,False,6.337,0.7735294117647058
+absolute_capacities,National Pool,Baden-Württemberg,Climate,0.7963,1.0103269002962671,True,7.1815,0.7735294117647058
+absolute_capacities,National Pool,Niedersachsen,Adaptive,0.5105,-0.4594500312800457,False,4.63,0.7735294117647058
+absolute_capacities,National Pool,Bremen,Energy,0.6434,0.24831924380550738,False,6.0135,0.7735294117647058
+absolute_capacities,National Pool,Nordrhein-Westfalen,Adaptive,0.5144,-0.23346535707176921,False,5.739,0.7735294117647058
+absolute_capacities,National Pool,Berlin,Energy,0.6324,0.5185780730760841,False,9.332,0.7735294117647058
+absolute_capacities,National Pool,Schleswig-Holstein,Adaptive,0.5455,0.18790132228144277,False,7.799,0.7735294117647058
+absolute_capacities,National Pool,Rheinland-Pfalz,Energy,0.4131,0.05681961586687234,False,9.3155,0.7735294117647058
+absolute_capacities,National Pool,Saarland,Energy,0.4227,0.06075188640346618,False,11.5155,0.7735294117647058
+absolute_capacities,National Pool,Thüringen,Adaptive,0.6556,0.7292736311154413,False,10.5895,0.7735294117647058
+absolute_capacities,National Pool,Brandenburg,Adaptive,0.5671,0.3379675058151562,False,9.308,0.7735294117647058
+absolute_capacities,National Pool,Mecklenburg-Vorpommern,Adaptive,0.7168,0.6834037093353291,True,10.6375,0.7735294117647058
+absolute_capacities,National Pool,Sachsen,Climate,0.5045,0.23985806247145558,False,12.018,0.7735294117647058
+absolute_capacities,National Pool,Sachsen-Anhalt,Adaptive,0.4566,0.07817645430146625,False,14.0165,0.7735294117647058
+absolute_capacities,Adjacency Flow,Hamburg,Energy,0.8481,0.7065131013035806,True,5.3645,0.7705882352941176
+absolute_capacities,Adjacency Flow,Bayern,Climate,0.8876,0.8314843683472047,True,6.3405,0.7705882352941176
+absolute_capacities,Adjacency Flow,Hessen,Energy,0.4545,0.01696803050152501,False,6.173,0.7705882352941176
+absolute_capacities,Adjacency Flow,Baden-Württemberg,Climate,0.7731,0.9351298021061647,True,7.5745,0.7705882352941176
+absolute_capacities,Adjacency Flow,Niedersachsen,Adaptive,0.4964,-0.4559609943319168,False,4.5715,0.7705882352941176
+absolute_capacities,Adjacency Flow,Bremen,Energy,0.6534,0.2671855897711236,False,5.9415,0.7705882352941176
+absolute_capacities,Adjacency Flow,Nordrhein-Westfalen,Adaptive,0.5118,-0.3085114822079772,False,5.3735,0.7705882352941176
+absolute_capacities,Adjacency Flow,Berlin,Energy,0.6386,0.5858988526157549,False,9.4285,0.7705882352941176
+absolute_capacities,Adjacency Flow,Schleswig-Holstein,Adaptive,0.5373,0.18010946739594652,False,7.722,0.7705882352941176
+absolute_capacities,Adjacency Flow,Rheinland-Pfalz,Energy,0.4974,0.23056249964072906,False,10.1115,0.7705882352941176
+absolute_capacities,Adjacency Flow,Saarland,Energy,0.4157,0.02050603806101825,False,11.345,0.7705882352941176
+absolute_capacities,Adjacency Flow,Thüringen,Adaptive,0.6388,0.698805074836731,False,10.7535,0.7705882352941176
+absolute_capacities,Adjacency Flow,Brandenburg,Adaptive,0.5624,0.31175962040399985,False,9.1235,0.7705882352941176
+absolute_capacities,Adjacency Flow,Mecklenburg-Vorpommern,Adaptive,0.7196,0.6882664653322946,True,10.451,0.7705882352941176
+absolute_capacities,Adjacency Flow,Sachsen,Climate,0.511,0.2636241595136062,False,11.904,0.7705882352941176
+absolute_capacities,Adjacency Flow,Sachsen-Anhalt,Adaptive,0.4647,0.07614516558136741,False,13.822,0.7705882352941176

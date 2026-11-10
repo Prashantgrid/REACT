@@ -1,2 +1,0 @@
-# Optional dependencies for the MaStR storage-data export.
-lxml>=5.0

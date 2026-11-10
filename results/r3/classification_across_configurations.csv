@@ -1,0 +1,17 @@
+,conventional_lowest_domain,M0_provisional,M0_T,M0_class,M1_provisional,M1_Psel,M1_T,M1_class,M2_baseline_provisional,M2_baseline_Psel,M2_baseline_class,M2_baseline_rank,M2_national_pool_provisional,M2_national_pool_Psel,M2_national_pool_class,M2_national_pool_rank,M2_adjacency_flow_provisional,M2_adjacency_flow_Psel,M2_adjacency_flow_class,M2_adjacency_flow_rank
+Hamburg,Energy,Energy,0.42606673558664837,Energy,Energy,0.6806,0.27026426224824707,Multidomain,Energy,0.6164,Multidomain,6.033,Energy,0.6806,Multidomain,5.231,Energy,0.6587,Multidomain,4.96
+Bayern,Energy,Climate,1.3687566256634889,Climate,Climate,0.8043,0.8591820684426218,Climate,Climate,0.7355,Climate,7.8795,Climate,0.8039,Climate,8.128,Climate,0.812,Climate,8.273
+Hessen,Energy,Energy,0.2748143392465293,Energy,Energy,0.5013,0.18094375377043637,Multidomain,Energy,0.4682,Multidomain,7.4055,Energy,0.4863,Multidomain,7.079,Energy,0.4752,Multidomain,6.853
+Baden-Württemberg,Energy,Climate,1.6208594477272071,Climate,Climate,0.8193,1.0201207769143354,Climate,Climate,0.7169,Climate,8.2355,Climate,0.8139,Climate,8.6805,Climate,0.8077,Climate,8.834
+Niedersachsen,Adaptive,Adaptive,-0.271858351501716,Multidomain,Adaptive,0.3779,-0.15741300827224997,Multidomain,Energy,0.3383,Multidomain,6.9775,Adaptive,0.3697,Multidomain,6.6495,Adaptive,0.3663,Multidomain,6.567
+Bremen,Energy,Energy,-1.002480186087577,Multidomain,Energy,0.4118,-0.5780788862039961,Multidomain,Energy,0.3617,Multidomain,5.448,Energy,0.3952,Multidomain,4.7205,Energy,0.4001,Multidomain,4.565
+Nordrhein-Westfalen,Energy,Energy,0.2665903645590071,Energy,Energy,0.5433,0.2163506140156416,Multidomain,Energy,0.5259,Multidomain,9.7895,Energy,0.546,Multidomain,9.572,Energy,0.5168,Multidomain,9.165
+Berlin,Energy,Energy,0.2520100231030158,Energy,Climate,0.4242,-0.0387277827919027,Multidomain,Energy,0.4796,Multidomain,8.1795,Energy,0.4397,Multidomain,8.5555,Energy,0.4735,Multidomain,8.699
+Schleswig-Holstein,Adaptive,Adaptive,-0.12370820777633003,Multidomain,Adaptive,0.4466,-0.05357940541541094,Multidomain,Adaptive,0.4207,Multidomain,7.46,Adaptive,0.4522,Multidomain,7.026,Adaptive,0.4415,Multidomain,7.058
+Rheinland-Pfalz,Energy,Energy,0.1548255439966164,Energy,Energy,0.5048,0.1307186154368034,Multidomain,Energy,0.4731,Multidomain,10.1385,Energy,0.4946,Multidomain,10.014,Energy,0.5451,Multidomain,10.8595
+Saarland,Adaptive,Adaptive,0.296115750001107,Adaptive,Adaptive,0.4555,0.2840725423145263,Multidomain,Adaptive,0.4357,Multidomain,9.355,Adaptive,0.4597,Multidomain,9.578,Adaptive,0.4561,Multidomain,9.382
+Thüringen,Adaptive,Adaptive,0.4978429210969847,Adaptive,Adaptive,0.5858,0.46524285460055326,Multidomain,Adaptive,0.5365,Multidomain,10.102,Adaptive,0.5721,Multidomain,10.1785,Adaptive,0.5698,Multidomain,10.412
+Brandenburg,Adaptive,Climate,0.6694232016954413,Climate,Climate,0.7259,0.3432262868549566,Climate,Climate,0.6881,Multidomain,7.8255,Climate,0.7299,Climate,8.1745,Climate,0.7211,Climate,8.0395
+Mecklenburg-Vorpommern,Adaptive,Adaptive,0.5776502550687372,Adaptive,Adaptive,0.6853,0.5164150235170715,Multidomain,Adaptive,0.6178,Multidomain,8.627,Adaptive,0.6769,Multidomain,8.273,Adaptive,0.6681,Multidomain,8.2185
+Sachsen,Adaptive,Climate,1.229208537663937,Climate,Climate,0.7126,0.7958083753116758,Climate,Climate,0.5723,Multidomain,9.51,Climate,0.7056,Climate,10.454,Climate,0.7191,Climate,10.516
+Sachsen-Anhalt,Adaptive,Adaptive,0.28196826640876793,Adaptive,Adaptive,0.4593,0.28701511528392554,Multidomain,Adaptive,0.5035,Multidomain,13.034,Adaptive,0.4583,Multidomain,13.686,Adaptive,0.4527,Multidomain,13.5985

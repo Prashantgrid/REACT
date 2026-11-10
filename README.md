@@ -1,128 +1,92 @@
-# REACT: revised Energy Strategy Reviews manuscript
+# REACT: code and data
 
-Reproducibility code for **Beyond Composite Rankings: A Probabilistic Multi-Domain
-Assessment of Regional Energy Resilience**, ESR-D-26-03728.
+Supplementary material for “Beyond Composite Rankings: A Probabilistic Multi-Domain Assessment
+of Regional Energy Resilience” (Energy Strategy Reviews).
 
-The main battery indicator now uses **one archived MaStR export, 1 October 2025,
-for all 16 states**. No state uses an interpolated or PV-proportional battery value.
-The later 31 October 2026 export is a separately dated sensitivity.
+## Contents
 
-## Install and run
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-bash run_revision.sh results
-```
-
-In the manuscript ZIP, these files are under `code/`; invoke
-`bash code/run_revision.sh results` from the package root. In the GitHub repository
-the code is at the repository root. The script resolves its input paths itself.
-It runs the three main scenarios, all appendix and reviewer analyses, 40 full-model
-year-block bootstrap samples, summaries, data checks, and Figures 3–6. It also
-updates numerical LaTeX tables when the manuscript source is present. Runtime
-depends on hardware. Logs are kept beside the outputs. `JOBS=2` reduces concurrent
-bootstrap workers; the default is four. `PYTHON=/path/to/python` selects an interpreter.
-
-Main settings: 2,000 hazard iterations, 10,000 diagnostic profile draws, 5,000
-permutation audit replicates, seed 12345. Robustness classifications use fewer
-permutation replicates because that audit does not enter the classification rule.
-A smoke test (`python REACT_ESR_reproducible.py smoke --fast`) uses smaller
-simulation counts and must not be quoted as manuscript results.
-
-## Main input and findings
-
-`data/mastr_storage/2025-10-01/storage_by_state.csv` is the default input. REACT
-reads `battery_energy_MWh_excluding_duration_flags` as `Storage_MWh` for every
-state and rejects missing states, duplicate states, invalid or negative values.
-The dataset keeps the raw energy column, net and gross power separately, missing
-energy counts, duration flags, and source-member fingerprints. See its README for
-selection, joining, units, and limitations.
-
-The screened national 2025 battery stock is 23,871.648430 MWh; raw stock is
-23,982.567730 MWh. The 21 flagged plants are a diagnostic exclusion, not an
-independently verified correction. Registered stock does not establish state of
-charge, dispatchability, household-battery controllability, or firm support.
-
-The manuscript rule is `P_sel >= 0.70 and T > 0`. The default panel identifies:
-
-- Baseline: Bayern and Baden-Württemberg, Climate Exposure.
-- National Pool and Adjacency Flow: Bayern, Baden-Württemberg, Brandenburg,
-  and Sachsen, Climate Exposure.
-
-These are **10 state–scenario cases**. Sachsen is just above the threshold under
-coherent hazards and is sensitive to input and specification changes. Hamburg
-remains below the main threshold. The 2022-only socio-economic subset removes
-Baden-Württemberg's identification; it also removes indicators and changes the
-construct. The results are comparative screening findings, not validated outage
-or operational-resilience predictions.
-
-```bash
-python verify_headline.py
-python -m unittest discover -s tests -v
-```
-
-The fixed-input diagnostic (M0) identifies five states; within-domain weight
-uncertainty (M1) retains four. M0 still propagates regression prediction error.
-The selected historical hazard copula is Student-t with nu=8.
-
-## Output map
-
-| Content | File under `results/` |
+| Folder | Content |
 |---|---|
-| All 48 state–scenario diagnoses | `classification_audit.csv` |
-| Exact input panel after normalization | `structural_indicator_panel.csv` |
-| Input and code fingerprints, settings | `run_manifest.json` |
-| Main expected ranks and rank acceptability | `results_*.csv`, `figure_data/` |
-| M0/M1/M2 and conventional diagnoses | `revision/m012_classification.csv` |
-| Storage panels, including raw and later snapshots | `revision/storage_correction.csv` |
-| All robustness checks summarized | `revision/robustness_matrix.csv` |
-| Full-model 40-sample year-block bootstrap | `revision/bootstrap_full_model.csv` |
-| Copula dependence, trends, held-out-year likelihood | `revision/copula_*.csv`, `revision/hazard_*.csv` |
-| Indicator and construct checks, five seeds, 16 panel deletions | `robustness/` |
-| Numbers for checking manuscript prose | `manuscript_numbers.txt` |
-| Input completeness and plausibility checks | `data_checks.md` |
+| `code/` | REACT model and analysis scripts. `REACT_v4.py` holds the processed hazard panel, the structural inputs, and the model engine; `REACT_ESR_reproducible.py` sets the manuscript specification (load-relative Energy System indicators, PRESS residuals, selection rule). |
+| `code/data/` | `manuscript_storage_panel.csv`: usable energy of registered operating battery systems, including household systems, from the Market Master Data Registry snapshot of 1 October 2025 after the quality screen. `dwd_regional_averages_txbs_year.txt`: official DWD regional hot-day averages. |
+| `code/react_pf/` | Helper modules (state definitions, warming deltas, classification helpers) imported by `react_r1_analyses.py` and `react_r3_configs.py`. |
+| `results/` | Archived outputs of all runs reported in the manuscript. |
+| `figure_sources/` | Scripts and processed data for the figures. |
 
-`reference/classification_audit.csv` records the complete main audit. Figures use
-the same output data, through `finalize_results.py` and `figure_sources/`.
-`update_manuscript_tables.py` updates numerical tables; narrative interpretations
-and dates still require author review when changing model inputs.
+## Requirements
 
-## Storage source and sensitivities
-
-The aggregation script reads the unit, plant, and catalogue XML members of one
-Bundesnetzagentur MaStR ZIP. It joins `SpeMastrNummer` to plant `MaStRNummer`,
-counts usable energy once per eligible plant, converts kW to MW and kWh to MWh,
-and excludes foreign, inactive, nonoperating, and known future units. Missing
-capacities are counted, never estimated. Batteries are separated from pumped
-storage and other technologies. Source URLs, filters, complete XML-member
-SHA-256 fingerprints and ZIP CRCs are in each snapshot's `provenance.json`.
+Python 3.10 or later and the packages in `code/requirements.txt`:
 
 ```bash
-python tools/aggregate_mastr_storage.py official_export.zip \
-  --snapshot-date 2025-10-01 \
-  --source-url https://download.marktstammdatenregister.de/Stichtag/Gesamtdatenexport_20251001_25.2.zip \
-  --output-dir data/mastr_storage/2025-10-01
+pip install -r code/requirements.txt
 ```
 
-Main data: [MaStR download portal](https://www.marktstammdatenregister.de/MaStR/Datendownload),
-provider Bundesnetzagentur, Datenlizenz Deutschland attribution 2.0.
-This is a derived dataset, not an official state statistical release.
+## Main analysis and sensitivity analyses
 
-The storage sensitivity replaces **all 16 values** with raw 2025 totals, the
-original submitted panel, the historical interim panel, or raw/screened 2026
-totals. The interim HH=145, BE=217, ST=605 MWh values are retained only for this
-comparison. To use another complete dated aggregate, pass it explicitly:
+From `code/`:
 
 ```bash
-bash run_revision.sh other_results path/to/main.csv path/to/later.csv
+python verify_headline.py                              # identified cases of the main run (~1 min)
+python REACT_ESR_reproducible.py ../results --mode all # main run and robustness analyses
+python react_r3_configs.py ../results                  # lowest score, M0, M1, M2
+python react_r3_analyses.py ../results/r3              # Energy System tests, warming
+python react_r3_mechanism.py ../results                # load-density mechanism
+python react_r1_analyses.py ../results/r1 copula 30    # bootstrap, split sample, trends, copula family
+python react_r1_analyses.py ../results/r1 params       # support layer, weights, derating, omissions
+python react_r1_analyses.py ../results/r1 noise        # prediction-perturbation scale
+python react_r1_weights.py ../results/r1               # domain-emphasis weight profiles
 ```
 
-The embedded structural and hazard data are in `REACT_v4.py`; the default battery
-panel overrides its legacy storage values. Energy capability is measured per MW
-of average regional load; battery energy per load is hours of average demand.
-Grid density is per state area. Absolute capacities, alternative grid
-normalisations, and thermal capacity coded as a cost or excluded are reported
-as construct sensitivities. National Pool and Adjacency Flow remain simplified
-support assumptions, not physical dispatch or observed corridor-limit models.
+Main settings: 2,000 hazard realisations per scenario, 10,000 diagnostic draws, seed 12345. The
+main classification audit reports 5,000 label permutations; the supporting analyses use fewer,
+because the classification depends on the selection frequency and the separation statistic only.
+
+Identified relative weaknesses in the main run (all Climate Exposure):
+
+- Baseline: Bayern, Baden-Württemberg.
+- National Pool and Adjacency Flow: Bayern, Baden-Württemberg, Brandenburg, Sachsen.
+
+The archived hot-day response curves (`results/r1/`, `results/r3/`) and the physical-corridor
+ratings (`results/r3/`) are processed inputs to the warming and corridor comparisons; they were
+derived from a daily maximum-temperature model and from the ENTSO-E grid extract used by
+PyPSA-Eur. Keep them when regenerating the other results.
+
+## Results and manuscript content
+
+| Manuscript content | Archived output |
+|---|---|
+| Main diagnoses, Fig. 5, Tables 5 and A.8 | `results/classification_audit.csv` |
+| Fig. 6: relative domain profiles (National Pool) | `results/results_national_pool.csv` |
+| Table 6: model configurations | `results/r3/classification_across_configurations.csv` |
+| Table 7: Energy System tests | `results/r3/r3_variants.csv` |
+| Table 8: evidence levels | `results/r3/evidence_levels.csv` |
+| Table A.9: alternative specifications | `results/robustness/robustness_specifications.csv` |
+| Table A.10: hazard record | `results/r1/r1_copula.csv`, `results/r1/r1_copula_fits.csv` |
+| Table A.10: support layer, weights, derating, omissions, observed inputs, warming | `results/r1/r1_params.csv`, `results/r1/r1_weights.csv` |
+| Table A.10: prediction perturbation | `results/r1/r1_noise.csv` |
+| Fig. 7: warming | `results/r3/climate_delta_classifications.csv`, `results/r3/climate_differential_classifications.csv` |
+| Physical-corridor comparison | `results/r3/lite_vs_physical_corridors.csv`, `results/r3/lite_adjacency_physical_corridors.csv` |
+
+For the fixed-input diagnostic, M0 identifies 13 states; adding within-domain weighting uncertainty (M1) retains four. The complete REACT run identifies 2, 4, and 4 state–scenario cases under Baseline, National Pool, and Adjacency Flow, respectively. These are diagnostic classifications, not predictions of actual outages.
+
+The table bodies and the numerical values quoted in the text are written from these files by:
+
+```bash
+mkdir -p ../tables
+python make_main_numbers.py ../results ../tables
+python make_r3_numbers.py ../results ../tables/numbers.tex
+python make_r3_tables.py ../results ../tables
+python make_r1_outputs.py ../results ../tables
+```
+
+The figures are written to `figure_sources/out/` by the scripts in `figure_sources/`
+(`python fig_rankings.py`, and likewise for the other scripts).
+
+## Interpretation
+
+A relative weakness is identified when the selection frequency is at least 0.70 and the separation
+statistic is positive. The selection frequency describes stability under the specified hazard,
+weight, and prediction uncertainty; it is not a calibrated probability. The label-permutation check
+is exploratory and does not enter the classification. Indicator-omission tests assess dependence on
+individual inputs; they do not harmonise reference years. The support layer does not test import
+reliability.

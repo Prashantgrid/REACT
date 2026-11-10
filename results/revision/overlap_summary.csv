@@ -1,7 +1,0 @@
-specification,Bayern,Baden-Württemberg,Brandenburg,Hamburg,additional,n_identified,rho_min,rho_max
-main,0.74-0.81 (3),0.72-0.81 (3),0.69-0.73 (2),0.62-0.68 (0),SN:Climate,10,1.0,1.0
-no_derating (hazards in Climate Exposure only),0.73-0.82 (3),0.72-0.81 (3),0.70-0.75 (2),0.61-0.68 (0),SN:Climate,9,0.988,1.0
-climate_without_HD_WSM_LWD (continuous derating drivers via Energy only),0.68-0.82 (2),0.68-0.83 (2),0.46-0.46 (0),0.55-0.66 (0),,4,0.859,0.879
-climate_without_low_wind,0.64-0.75 (2),0.65-0.79 (2),0.64-0.68 (0),0.55-0.65 (0),SN:Climate,6,0.947,0.979
-climate_without_hot_days,0.75-0.84 (3),0.73-0.81 (3),0.62-0.66 (0),0.60-0.66 (0),SN:Climate,8,0.953,0.974
-thermal_excluded,0.76-0.85 (3),0.72-0.82 (3),0.61-0.68 (0),0.62-0.69 (0),,6,0.941,0.976

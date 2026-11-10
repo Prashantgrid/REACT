@@ -75,15 +75,12 @@ for ax, sc in zip(axes, ("Baseline", "National Pool", "Adjacency Flow")):
     ax.set_aspect("equal"); ax.autoscale_view(); ax.axis("off")
     x0, x1 = ax.get_xlim(); ax.set_xlim(x0 - 60e3, x1 + 60e3)
 
-# Legend: saturated entries only for domains that are identified somewhere; pale entries for all.
-names = {"Climate": "Climate Exposure", "Energy": "Energy System", "Socio-econ.": "Socio-economic Capacity"}
-ident_dom = [k for k in names if any(prof[ab][sc]["identified"] and prof[ab][sc]["domain"] == k
-                                     for ab in prof for sc in prof[ab])]
-h = [Patch(fc=S.DOMAIN_COL[k], ec="none") for k in ident_dom] + \
-    [Patch(fc=pale(S.DOMAIN_COL[k]), ec="none") for k in names]
-lab = [f"{names[k]}: identified weakness" for k in ident_dom] + [f"{names[k]}: provisional domain (multidomain)" for k in names]
+h = [Patch(fc=S.DOMAIN_COL[k], ec="none") for k in ("Climate", "Energy", "Socio-econ.")] + \
+    [Patch(fc=pale(S.DOMAIN_COL[k]), ec="none") for k in ("Climate", "Energy", "Socio-econ.")]
+lab = ["Climate Exposure", "Energy System", "Socio-economic Capacity"] * 2
 fig.legend(h, lab, ncol=2, loc="lower center", frameon=False, fontsize=6.6, columnspacing=1.2, handlelength=1.3,
-           bbox_to_anchor=(0.5, -0.0))
+           bbox_to_anchor=(0.5, -0.02),
+           title="Relative domain weakness (saturated)  |  Multidomain, provisional domain (pale)", title_fontsize=6.6)
 fig.subplots_adjust(left=0.0, right=1.0, top=0.93, bottom=0.18, wspace=0.02)
 S.save(fig, "fig05_relative_weakness_map")
 print("ok")

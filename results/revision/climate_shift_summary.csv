@@ -1,6 +1,0 @@
-specification,Bayern,Baden-Württemberg,Brandenburg,Hamburg,additional,n_identified,rho_min,rho_max
-main,0.74-0.81 (3),0.72-0.81 (3),0.69-0.73 (2),0.62-0.68 (0),SN:Climate,10,1.0,1.0
-trend_adjusted_2024,0.72-0.79 (3),0.73-0.81 (3),0.71-0.76 (3),0.59-0.66 (0),MV:Adaptive,11,0.956,0.976
-trend_extrapolated_2050,0.67-0.72 (2),0.72-0.77 (3),0.78-0.81 (3),0.59-0.63 (0),MV:Adaptive,10,0.859,0.918
-trend_2050_heat_moisture_precip_only,0.75-0.81 (3),0.70-0.75 (3),0.74-0.76 (3),0.58-0.61 (0),MV:Adaptive,11,0.859,0.947
-uniform_intensification,0.74-0.80 (3),0.72-0.81 (3),0.69-0.73 (2),0.62-0.68 (0),SN:Climate,10,0.997,1.0

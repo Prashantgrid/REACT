@@ -1,6 +1,7 @@
-.venv/
+# Generated Python state
 __pycache__/
-*.pyc
-REACT_ESR_outputs/
-results/
-.DS_Store
+*.py[cod]
+.venv/
+# Generated figure exports and local diagnostics
+figure_sources/out/
+*.log

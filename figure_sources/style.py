@@ -49,7 +49,7 @@ ISO = {"BW": "DE-BW", "BY": "DE-BY", "BE": "DE-BE", "BB": "DE-BB", "HB": "DE-HB"
 def apply():
     mpl.rcParams.update({
         "font.family": "serif",
-        "font.serif": ["Liberation Serif", "Times New Roman", "TeX Gyre Termes", "STIXGeneral", "DejaVu Serif"],
+        "font.serif": ["Liberation Serif", "Times New Roman", "TeX Gyre Termes"],
         "mathtext.fontset": "stix",
         "font.size": 8,
         "axes.titlesize": 8,
