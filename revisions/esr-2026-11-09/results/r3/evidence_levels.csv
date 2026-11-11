@@ -1,0 +1,11 @@
+state,domain,tier,n_main,n_alt,n_alt_all,warm1,warm,het_min,het_max,psel,psel_min
+Baden-Württemberg,Climate,Persistent,3,9,9,3,3,0.75,1.0,0.8139,0.7169
+Bayern,Climate,Persistent,3,9,9,3,3,0.6666666666666666,0.9166666666666666,0.812,0.7355
+Brandenburg,Climate,Conditional,2,6,6,2,2,0.9166666666666666,0.9166666666666666,0.7299,0.6881
+Hamburg,Energy,Further investigation,0,4,0,0,0,,,0.6806,0.6164
+Mecklenburg-Vorpommern,Adaptive,Further investigation,0,3,0,0,0,,,0.6769,0.6178
+Nordrhein-Westfalen,Energy,Further investigation,0,0,0,0,0,,,0.546,0.5168
+Rheinland-Pfalz,Energy,Further investigation,0,0,0,0,0,,,0.5451,0.4731
+Sachsen,Climate,Conditional,2,5,4,2,2,0.3333333333333333,0.6666666666666666,0.7191,0.5723
+Sachsen-Anhalt,Adaptive,Further investigation,0,0,0,0,0,,,0.5035,0.4527
+Thüringen,Adaptive,Further investigation,0,0,0,0,0,,,0.5721,0.5365

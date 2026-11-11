@@ -1,0 +1,4 @@
+pair,spearman
+baseline~national_pool,0.9588235294117649
+baseline~adjacency_flow,0.9676470588235294
+national_pool~adjacency_flow,0.9794117647058824

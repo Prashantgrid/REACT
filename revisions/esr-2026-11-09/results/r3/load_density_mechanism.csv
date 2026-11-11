@@ -1,0 +1,10 @@
+,value
+load_density_ratio,63.2458940397351
+ren_area_ratio,2.93530981405539
+sd_log_load_density,1.146379539317458
+sd_log_ren_area,0.2939312743238224
+corr_logKL_neglogell,0.9674792281937633
+rho_E_ell,-0.8088235294117646
+rho_S_ell,0.788235294117647
+partial_r_ES_given_logell,-0.6623184174803938
+r_ES_territorial,-0.7901557665399949
